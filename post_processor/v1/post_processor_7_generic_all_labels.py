@@ -49,6 +49,14 @@ class PostProcessor(BasePostProcessor):
             for label in self.label_top_n['class_names']:
                 pred_df = predictions[predictions.label == label]
                 pred_df = pred_df[pred_df['probability'] > labeling_threshold]
+
+                if pred_df.empty:
+                    pred_df = pd.DataFrame(columns=predictions.columns)
+                    pred_df.loc[0, "label"] = label
+                    pred_df.loc[0, "probability"] = 0.0
+                    pred_df.loc[0, "ocr_confidence"] = 0.0
+                    pred_df = pred_df.fillna('')
+
                 predictions_filtered.append(pred_df)
             predictions_filtered = pd.concat(predictions_filtered)
 

@@ -65,8 +65,8 @@ class PostProcessor(BasePostProcessor):
             'pageIndex': filtered_row['page_id'],
             filtered_label: filtered_text,
             'lineId': filtered_row['line'],
-            'labelConfidence': filtered_row['probability'],
-            'ocrConfidence': filtered_row['ocr_confidence'],
+            "labelConfidence": round(float(filtered_row["probability"]), 3),
+            "ocrConfidence": round(float(filtered_row.get("ocr_confidence", 1.0)), 3),
             'imageCoordinates': {
                 'xmin': (filtered_row['xmin']),
                 'ymin': (filtered_row['ymin']),
