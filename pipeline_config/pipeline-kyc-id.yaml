@@ -1,0 +1,102 @@
+spec: #defined at publish pipeline, reflects at least
+  #python -m argus.pipeline \
+  #  -t argus.processors.ocr_processors.Intake root_docs_path=5pdfs follow_symlinks=true \
+  #  -t argus.processors.ocr_processors.PdfTextExtract \
+  #  -t argus.processors.ocr_processors.NormalizeImages resample_to_dpi=300 normalize_image_format=.png \
+  #  -t argus.processors.ocr_processors.GenericOcr ocr_style=TesseractOcr \
+  #  -o 5pdfs_work_dir
+  #
+  #python -m argus.pipeline \
+  #  -i 5pdfs_work_dir/task_3_GenericOcr_0 resource_root_dir=FROM_ANNOSET \
+  #  -i 5pdfs_work_dir/task_0_MiniProgram_0  \
+  #  -t argus.processors.core_processors.ShapeIntersection \
+  #  -t argus.processors.core_processors.Split what=pages fractions=.8,.2 \
+  #  -t argus.processors.train_eval_processors.TrainEvalProcessor epochs=1 \
+  #  -o 5pdfs_work_dir_part2
+
+# scoring in one go
+# python -m argus.pipeline \
+#   -t argus.processors.ocr_processors.Intake root_docs_path=5pdfs follow_symlinks=true \
+#   -t argus.processors.ocr_processors.PdfTextExtract \
+#   -t argus.processors.ocr_processors.NormalizeImages resample_to_dpi=300 normalize_image_format=.png \
+#   -t argus.processors.ocr_processors.GenericOcr ocr_style=TesseractOcr \
+#   --reorder_inputs None,0 \
+#   -t argus.processors.train_eval_processors.TrainEvalProcessor base_model_name_or_path=/PathToModel \
+#   --reorder_inputs None,0 \
+#   -t argus.processors.train_eval_processors.TrainEvalProcessor base_model_name_or_path=/PathToModel \
+#   -t argus.processors.post_processors.generic_post_processor.PostProcessor \
+#   -o 5pdfs_scoring_in_one_go
+
+
+  pipeline:
+    steps:
+    - tasks:
+       - name: "Intake" #name of task
+         type: PipelineTask # if absent, defaults to PipelineTask.  Can also be PipelineReorderInputs and InputCommand.  InputCommand cannot be used in the scorer.
+         class: argus.processors.ocr_processors.Intake # fqn_of_Processor class
+         parameters:
+           root_docs_path: /input/path
+           follow_symlinks: true
+    - tasks:
+       - name: "PdfExtract" #name of task
+         type: PipelineTask # if absent, defaults to PipelineTask.  Can also be PipelineReorderInputs and InputCommand.  InputCommand cannot be used in the scorer.
+         class: argus.processors.ocr_processors.PdfTextExtract # fqn_of_Processor class
+    - tasks:
+       - name: "ImageNormalize" #name of task
+         class: argus.processors.ocr_processors.NormalizeImages
+         parameters:
+           resample_to_dpi: 300 
+           normalize_image_format: .jpg
+    - tasks:
+       - name: "OCR" #name of task
+         class: argus.processors.ocr_processors.GenericOcr
+         parameters:
+           ocr_style: E3DocTROcr
+    - tasks:
+       - name: "move input annoset from 0th into 1st position"
+         type: PipelineReorderInputs
+         reordering: [null, 0]
+    - tasks:
+       - name: "Predict"
+         class: argus.processors.train_eval_processors.TrainEvalProcessor
+         parameters:
+           artifacts:
+              base_model_name_or_path: id_card_model #matches the basename before .zip
+    - tasks:
+       - name: "move input annoset from 0th into 1st position"
+         type: PipelineReorderInputs
+         reordering: [null, 0]
+    - tasks:
+       - name: "Predict" # Are we allow a duplicated tasks name? or have to be one as token predict and another as page predict
+         class: argus.processors.train_eval_processors.TrainEvalProcessor
+         parameters:
+           uses_resource_dir: false
+           artifacts:
+              base_model_name_or_path: page_class_model #matches the basename before .zip
+    - tasks:
+       - name: "PostProcess"
+         class: argus.processors.post_processors.generic_post_processor.PostProcessor
+         parameters:
+           output_format: 'json'
+           labeling_threshold: 0.8
+           # extra_params: "{'parse_line_items':False, 'output_labels':'ALL_TOKENS'}"
+
+
+    - tasks:
+        ...
+    #other parameters to the Pipeline constructor go here
+    output_dir: /some/path # the location where inner and final annosets will be written (if they'll be written).  Also the location of the output root_resource_paths
+    output_annoset_format:  #the format of the final (output) annosets.  Defaults to in-memory output annoset.
+      path: null
+      options: {}
+    working_dir: /some/path #all relative paths will be relative to this dir, (except output annosets and their root_resource_paths, which are relative to output_dir)
+    #document filtering options
+    doc_id_prefix: null #can be /path
+    doc_id_prefix_range: null #can be [path, path], python-range style
+    filter_ids_file: null #can be path/to/one_doc_name_per_line.txt
+    write_all_steps: false #if true, write inner output annosets in pickle format 
+    cache_processors: true #if true, cache Processor instances rather than constructing them from scratch for every invocation
+    
+    artifacts:
+    - "s3://document-ai-data/test_data/id_card_model.zip"
+    - "s3://document-ai-data/test_data/page_class_model.zip"
