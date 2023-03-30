@@ -1,28 +1,4 @@
-spec: #defined at publish pipeline
-# page classification router 
-# python -m argus.pipeline \
-#   -t argus.processors.ocr_processors.Intake root_docs_path=test_imgs follow_symlinks=true \
-#   -t argus.processors.ocr_processors.PdfTextExtract \
-#   -t argus.processors.ocr_processors.NormalizeImages resample_to_dpi=300 normalize_image_format=.png \
-#   -t argus.processors.ocr_processors.GenericOcr ocr_style=GPUDocTROcr \
-#   -t argus.processors.train_eval_processors.TrainEvalProcessor base_model_name_or_path=/home/mzhao/Data/work/DocAI/test_pipeline/page_classification/page_classifier predict_only=true \
-#   -t argus.processors.train_eval_processors.TrainEvalProcessor base_model_name_or_path=/home/mzhao/Data/work/DocAI/test_pipeline/id_card/model predict_only=true when:EOS "
-# p=pages[0]
-# if p.attributes.get('page_class','w2')=='w9':
-#     action=PROCESS
-# else:
-#     action=SKIP_PAGE
-# " EOS \
-#   -t argus.processors.train_eval_processors.TrainEvalProcessor base_model_name_or_path=/home/mzhao/Data/work/DocAI/test_pipeline/id_card/model predict_only=true when:EOS "
-# p=pages[0]
-# if p.attributes.get('page_class','w9')=='w2':
-#     action=PROCESS
-# else:
-#     action=SKIP_PAGE
-# " EOS \
-#   -t argus.processors.post_processors.generic_post_processor.PostProcessor \
-#   --write_all_steps \
-#   -o page_router_fix
+spec: A scoring pipeline example that does conditional processing, OCR and page classifier and then predict tokens token class prediction and page class prediction on a set of data
 
 
   pipeline:
@@ -35,22 +11,22 @@ spec: #defined at publish pipeline
            root_docs_path: /input/path
            follow_symlinks: true
     - tasks:
-         - name: "PdfExtract" #name of task
-           type: PipelineTask # if absent, defaults to PipelineTask.  Can also be PipelineReorderInputs and InputCommand.  InputCommand cannot be used in the scorer.
-           class: argus.processors.ocr_processors.PdfTextExtract # fqn_of_Processor class
+         - name: "PdfExtract"
+           type: PipelineTask 
+           class: argus.processors.ocr_processors.PdfTextExtract 
     - tasks: 
-         - name: "ImageNormalize" #name of task
+         - name: "ImageNormalize" 
            class: argus.processors.ocr_processors.NormalizeImages
            parameters:
              resample_to_dpi: 300
              normalize_image_format: .jpg
     - tasks:
-         - name: "OCR" #name of task
+         - name: "OCR" 
            class: argus.processors.ocr_processors.GenericOcr
            parameters:
              ocr_style: E3DocTROcr
     - tasks:
-         - name: "Predict" # Are we allow a duplicated tasks name? or have to be one as token predict and another as page predict
+         - name: "Predict" 
            class: argus.processors.train_eval_processors.TrainEvalProcessor
            parameters:
              predict_only: true
@@ -68,8 +44,7 @@ spec: #defined at publish pipeline
                     else:
                         action=SKIP_PAGE
              artifacts:
-                base_model_name_or_path: id_card_model #matches the basename before .zip
-
+                base_model_name_or_path: id_card_model 
     - tasks:
           - name: "Predict"
             class: argus.processors.train_eval_processors.TrainEvalProcessor
@@ -82,13 +57,13 @@ spec: #defined at publish pipeline
                     else:
                         action=SKIP_PAGE
               artifacts:
-                base_model_name_or_path: trained_model_invoice #matches the basename before .zip
+                base_model_name_or_path: trained_model_invoice 
     - tasks:
           - name: "PostProcess"
             class: argus.processors.post_processors.generic_post_processor.PostProcessor
             parameters:
               output_format: "json"
-              labeling_threshold: 0.8
+              labeling_threshold: 0.2
 
     - tasks: ...
     #other parameters to the Pipeline constructor go here
