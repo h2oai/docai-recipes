@@ -1,4 +1,4 @@
-spec: A general scoring pipeline example that does OCR, token class prediction and page class prediction on a set of data
+spec: # A general scoring pipeline example that does OCR, token class prediction and page class prediction on a set of data
 
   pipeline:
     steps:

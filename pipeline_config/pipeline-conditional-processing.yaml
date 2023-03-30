@@ -1,4 +1,4 @@
-spec: A scoring pipeline example that does conditional processing, OCR and page classifier and then predict tokens token class prediction and page class prediction on a set of data
+spec: # A scoring pipeline example that does conditional processing, OCR and page classifier and then predict tokens token class prediction and page class prediction on a set of data
 
 
   pipeline:
@@ -26,14 +26,14 @@ spec: A scoring pipeline example that does conditional processing, OCR and page 
            parameters:
              ocr_style: E3DocTROcr
     - tasks:
-         - name: "Predict" 
+         - name: "Predict_page" 
            class: argus.processors.train_eval_processors.TrainEvalProcessor
            parameters:
              predict_only: true
              artifacts:
                 base_model_name_or_path: page_classifier_ID_INV #matches the basename before .zip
     - tasks:
-         - name: "Predict"
+         - name: "Predict_token"
            class: argus.processors.train_eval_processors.TrainEvalProcessor
            parameters:
              predict_only: true
@@ -46,7 +46,7 @@ spec: A scoring pipeline example that does conditional processing, OCR and page 
              artifacts:
                 base_model_name_or_path: id_card_model 
     - tasks:
-          - name: "Predict"
+          - name: "Predict_token"
             class: argus.processors.train_eval_processors.TrainEvalProcessor
             parameters:
               predict_only: true
