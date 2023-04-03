@@ -33,7 +33,7 @@ spec: # A scoring pipeline example that does conditional processing, OCR and pag
              artifacts:
                 base_model_name_or_path: page_classifier_ID_INV #matches the basename before .zip
     - tasks:
-         - name: "Predict_token"
+         - name: "Predict_token_id"
            class: argus.processors.train_eval_processors.TrainEvalProcessor
            parameters:
              predict_only: true
@@ -46,7 +46,7 @@ spec: # A scoring pipeline example that does conditional processing, OCR and pag
              artifacts:
                 base_model_name_or_path: id_card_model 
     - tasks:
-          - name: "Predict_token"
+          - name: "Predict_token_invoice"
             class: argus.processors.train_eval_processors.TrainEvalProcessor
             parameters:
               predict_only: true
