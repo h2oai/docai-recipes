@@ -14,4 +14,4 @@ Custom post-processing scripts, coded in Python, are utilized to modify the outp
 The `notes` folder contains various sample notebooks that can guide users in tuning their own custom post-processing scripts. Specifically, the notebooks show how to tune various post-processing parameters, such as how tokens are grouped together, how line items are extracted, how template methods are used, and other common post-processing tasks. 
 
 ## Scripts
-Various scripts to ease burden of testing frontend functionalities, including pipeline benchmarking, pipeline deletion, and deletion of document sets.
+Various scripts found in `scripts` to ease burden of testing frontend functionalities, including pipeline benchmarking, pipeline deletion, and deletion of document sets.
