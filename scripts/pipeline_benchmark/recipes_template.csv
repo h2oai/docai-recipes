@@ -1,0 +1,1 @@
+pipeline_name,project_token_name,model_token_name,project_page_name,model_page_name,ocr_method,post_processor,min_replicas,max_replicas,requests_cpu,requests_memory,limits_cpu,limits_memory
