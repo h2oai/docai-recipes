@@ -36,7 +36,7 @@ def arguments() -> ArgumentParser:
         )
     
     main_parser.add_argument(
-        '--pipeline_recipes',type=str,required=True,
+        '--pipeline_recipes', type=str, required=False, default = None,
         help="CSV containing pertinent information to create desired piplines: pipeline_name, project_token_name, model_token_name, ocr_method, and kubernetes parameters."
         )
     main_parser.add_argument(
@@ -118,14 +118,14 @@ def arguments() -> ArgumentParser:
         )
     return main_parser
 
+
+
 def main(argv=None) -> None:
     
     parser = arguments()
     args = parser.parse_args(argv)
     
     setup_environment(args)
-    ACCESS_TOKEN = get_access_token(args)
-    pipeline_df = pd.read_csv(args.pipeline_recipes).replace(r'^\s*$', np.nan, regex=True)
     
     wait = False
     try:
@@ -134,6 +134,15 @@ def main(argv=None) -> None:
             wait=True
     except OSError:
         wait=True
+    
+    if args.pipeline_recipes == None and len(pd.read_csv(args.pipeline_list).index) != 0:
+        execute_pipelines(
+        args = args
+        )
+        return
+    
+    ACCESS_TOKEN = get_access_token(args)
+    pipeline_df = pd.read_csv(args.pipeline_recipes).replace(r'^\s*$', np.nan, regex=True)
     
     pipeline_df = get_uuids(
         args = args,
@@ -155,8 +164,7 @@ def main(argv=None) -> None:
         print('\n')
     
     execute_pipelines(
-        args = args,
-        df = pipeline_df
+        args = args
         )
         
     delete_pipelines(
@@ -165,25 +173,37 @@ def main(argv=None) -> None:
         )
    
    
+   
 def setup_environment(args: Namespace) -> None:
-    if os.path.exists(args.pipeline_recipes) == False:
-        recipes_template = pd.DataFrame({
-            'pipeline_name':[],
-            'project_token_name':[],
-            'model_token_name':[],
-            'project_page_name':[],
-            'model_page_name':[],
-            'ocr_method':[],
-            'post_processor':[],
-            'min_replicas':[],
-            'max_replicas':[],
-            'requests_cpu':[],
-            'requests_memory':[],
-            'limits_cpu':[],
-            'limits_memory':[]
-        })
-        recipes_template.to_csv('template.csv',mode='w',index=False)
-        SystemExit(f'|  FAILURE  |  No recipe CSV named \"{args.pipeline_recipes}\" found; creating template.')
+    if  args.pipeline_recipes != None:
+        if os.path.exists(args.pipeline_recipes) == False:
+            recipes_template = pd.DataFrame({
+                'pipeline_name':[],
+                'project_token_name':[],
+                'model_token_name':[],
+                'project_page_name':[],
+                'model_page_name':[],
+                'ocr_method':[],
+                'post_processor':[],
+                'min_replicas':[],
+                'max_replicas':[],
+                'requests_cpu':[],
+                'requests_memory':[],
+                'limits_cpu':[],
+                'limits_memory':[]
+            })
+            recipes_template.to_csv('template.csv',mode='w',index=False)
+            SystemExit(f'|  FAILURE  |  No recipe CSV named \"{args.pipeline_recipes}\" found; creating template.')
+    elif args.pipeline_recipes == None:
+        print(f'|  WARNING  |  No \"pipeline_recipes\" file selected')
+    
+    
+    try:
+        pipeline_list = pd.read_csv(args.pipeline_list)
+        if pipeline_list.keys()[0] != 'pipeline_name':
+            pd.Dataframe({'pipeline_name':[pipeline_list[pipeline_list.keys()[0]].values.to_list()]}).to_csv(args.pipeline_list,mode='w', index=False, header=True)
+    except Exception:
+        pd.Dataframe({'pipeline_name':[]}).to_csv(args.pipeline_list,mode='w', index=False, header=True)
     
     
     if os.path.exists(args.folder_output) == True:
@@ -446,7 +466,7 @@ def create_pipelines(args: Namespace, ACCESS_TOKEN: str, row: pd.Series) -> None
             df.to_csv(args.pipeline_list,mode='w', index=False, header=True)
 
 
-def execute_pipelines(args: Namespace, df: pd.DataFrame) -> None:
+def execute_pipelines(args: Namespace) -> None:
     pipeline_list = pd.read_csv(args.pipeline_list).to_numpy().flatten()
     
     ansi_remove = regex.compile(r'\x1B\[[0-9;]*[a-zA-Z]')
