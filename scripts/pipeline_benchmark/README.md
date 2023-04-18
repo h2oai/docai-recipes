@@ -1,5 +1,5 @@
 <!--  Use with consent of H2O.ai  -->
-<!--        April 12, 2023        -->
+<!--        April 18, 2023        -->
 
 # **Scoring Pipeline Testing**
 ---
@@ -240,8 +240,14 @@ python -m pipeline --pipeline_recipes pipeline_recipes.csv --scorer_url "https:/
 
 Example Command (`curl`):
 ```
-python -m pipeline --pipeline_recipes pipeline_recipes.csv --scorer_url "https://document-ai-scorer.cloud-qa.h2o.ai" --replicas 8 --requests 8 --image_supdir scorer_datasets --datasets 5_pdf cba12_pdf cba12_png sroie_100_pdf docbank_100_jpg --folder_output output --results results.csv --pipeline_list pipeline_list.csv curl --auth_url --
+python -m pipeline --pipeline_recipes pipeline_recipes.csv --scorer_url "https://document-ai-scorer.cloud-qa.h2o.ai" --replicas 8 --requests 8 --image_supdir scorer_datasets --datasets 5_pdf cba12_pdf cba12_png sroie_100_pdf docbank_100_jpg --folder_output output --results results.csv --pipeline_list pipeline_list.csv curl --auth_url "https://keycloak.url.com/auth/realms/realm/protocol/openid-connect/token" --client_id client-id --username username --password password
 ```
+
+Example Command (existing pipelines):
+```
+python -m pipeline --scorer_url "https://document-ai-scorer.cloud-qa.h2o.ai" --replicas 8 --requests 8 --image_supdir scorer_datasets --datasets 5_pdf cba12_pdf cba12_png sroie_100_pdf docbank_100_jpg --folder_output output --results results.csv --pipeline_list pipeline_list.csv sso
+```
+
 ## **Known issues**
 
 > **Failed `grep` times**:
