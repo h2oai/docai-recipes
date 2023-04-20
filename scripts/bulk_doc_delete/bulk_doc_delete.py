@@ -1,5 +1,5 @@
 ###    Use with consent of H2O.ai, INC.    ###
-###              April 4, 2023             ###
+###              April 20, 2023             ###
 
 import os
 import requests
@@ -12,7 +12,7 @@ import h2o_authn
 
 from subprocess import Popen, PIPE
 from requests import get, post, delete
-from argparse import ArgumentParser,RawTextHelpFormatter
+from argparse import ArgumentParser, RawTextHelpFormatter, Namespace
 from datetime import datetime, timezone, timedelta
 from h2o_authn import TokenProvider
 
@@ -119,7 +119,7 @@ WARNING: Must enclose with \"\" to ensure proper script execution"
     return parser
 
 
-def main(argv=None):
+def main(argv: Namespace = None):
     parser = arguments()
     args = parser.parse_args(argv)
     
@@ -139,7 +139,7 @@ def main(argv=None):
     delete_document_sets(args=args, ACCESS_TOKEN=ACCESS_TOKEN)
 
 
-def get_access_token(args):
+def get_access_token(args: Namespace) -> str:
     if args.auth == 'curl':
         headers = {
             "Content-Type":"application/x-www-form-urlencoded"
@@ -202,7 +202,7 @@ def get_access_token(args):
             raise SystemExit(f'|  EXITING   |  SSO_TOKEN: {err}')
 
 
-def delete_document_sets(args, ACCESS_TOKEN):
+def delete_document_sets(args: Namespace, ACCESS_TOKEN: str):
     if args.filtering != "All projects":
         with open(args.filtering, 'r') as f:
             projects_to_delete_from = f.read().splitlines()
