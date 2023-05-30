@@ -23,11 +23,6 @@ from argparse import ArgumentParser, Namespace
 from datetime import datetime, timezone, timedelta
 from h2o_authn import TokenProvider
 
-
-"""
-python -m pipeline --pipeline_recipes pipeline_recipes.csv --scorer_url "https://document-ai-scorer.cloud-qa.h2o.ai" --replicas 8 --requests 8 --image_supdir scorer_datasets --datasets 5_pdf cba12_pdf cba12_png sroie_100_pdf docbank_100_jpg --folder_output output --results results.csv --pipeline_list pipeline_list.csv h2o 
-"""
-
 def arguments() -> ArgumentParser:
     main_parser = ArgumentParser(description='Tool to automatically create, test, and delete scoring pipelines for the Document AI service.')
     authparsers = main_parser.add_subparsers(
