@@ -6,6 +6,9 @@ on:
       - 'main'
   pull_request:
 
+env:
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
 jobs:
   trivy-scan:
     runs-on: ubuntu-latest
@@ -23,3 +26,6 @@ jobs:
           exit-code: 0 # not adding exit code 1 temporarily until mpmath (HIGH) is fixed
           security-checks: 'vuln,config'
           severity: 'CRITICAL,HIGH'
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/python@master
+
