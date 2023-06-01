@@ -10,19 +10,12 @@ env:
   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
 jobs:
-  trivy-scan:
+  snyk-code-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
-          exit-code: 0 # not adding exit code 1 temporarily until mpmath (HIGH) is fixed
-          security-checks: 'vuln,config'
-          severity: 'CRITICAL,HIGH'
+      - name: Install Snyk CLI
+        run:  npm install -g snyk
+      - name: Run Snyk Code test
+        run:  snyk code test 
