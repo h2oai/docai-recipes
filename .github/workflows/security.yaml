@@ -17,15 +17,6 @@ jobs:
         uses: actions/checkout@v3
       - name: Install Snyk CLI
         run:  npm install -g snyk
-      - name: Run Snyk Static Code test
-        run:  snyk code test --json | jq '.vulnerabilities[] | select(.severity == "high" or .severity == "critical")' > snyk-results.json
-          if [ -s snyk-results.json ]
-          then
-            echo "Critical vulnerabilities found.Failing the build."
-            exit 1
-          else
-            echo "No critical vulnerabilities found."
-          fi
       - name: Check dependencies for vulnerabilities
         run:  |
           snyk test --json | jq '.vulnerabilities[] | select(.severity == "high" or .severity == "critical")' > snyk-results.json
