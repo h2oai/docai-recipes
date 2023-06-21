@@ -57,3 +57,5 @@ else:
   -o page_router
 ```
 
+### A signature detector pipeline
+Can be found [here](https://github.com/h2oai/argus-ocr/blob/master/tests/data/mini_dataset/DetectSignature_pas/readme.md). It's used to generate an annoset used in unit tests.
