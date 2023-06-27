@@ -59,3 +59,15 @@ else:
 
 ### A signature detector pipeline
 Can be found [here](https://github.com/h2oai/argus-ocr/blob/master/tests/data/mini_dataset/DetectSignature_pas/readme.md). It's used to generate an annoset used in unit tests.
+
+### A pipeline config showing how to process only the first page of each document, dropping all other pages.
+Can be found [here](https://github.com/h2oai/argus-ocr/blob/master/tests/data/config/pipeline-page-subset.yaml). It's used to generate an annoset used in unit tests.
+Run the snippet like this
+```bash
+python -m argus.pipeline -c tests/data/config/pipeline-page-subset.yaml -o try
+```
+See the final annoset like this
+```bash
+python -m argus.aq -s 'T' -i try/task_3_MiniProgram_0 -r yaml | less
+```
+The logs show that there are as many output pages as there are documents (even though the input set has some multi-page documents).
