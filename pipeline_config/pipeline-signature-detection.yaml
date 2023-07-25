@@ -1,4 +1,4 @@
-spec: # A scoring pipeline example that does conditional processing, OCR and page classifier and then predict tokens token class prediction and page class prediction on a set of data
+spec: # A scoring pipeline example that does general OCR and a specialOCR to detect signatures on the page
 
 
   pipeline:
@@ -13,7 +13,9 @@ spec: # A scoring pipeline example that does conditional processing, OCR and pag
     - tasks:
          - name: "PdfExtract"
            type: PipelineTask 
-           class: argus.processors.ocr_processors.PdfTextExtract 
+           class: argus.processors.ocr_processors.PdfTextExtract
+           parameters:
+             skip_text_extraction: true
     - tasks: 
          - name: "ImageNormalize" 
            class: argus.processors.ocr_processors.NormalizeImages
@@ -24,40 +26,16 @@ spec: # A scoring pipeline example that does conditional processing, OCR and pag
          - name: "OCR" 
            class: argus.processors.ocr_processors.GenericOcr
            parameters:
-             ocr_style: E3DocTROcr
+             ocr_style: DocTROcr
     - tasks:
-         - name: "Predict_page" 
-           class: argus.processors.train_eval_processors.TrainEvalProcessor
-           parameters:
-             predict_only: true
-             artifacts:
-                base_model_name_or_path: page_classifier_ID_INV #matches the basename before .zip
+         - name: "Signature detection"
+           class: argus.processors.ocr_processors.DetectSignature
     - tasks:
-         - name: "Predict_token_id"
-           class: argus.processors.train_eval_processors.TrainEvalProcessor
-           parameters:
-             predict_only: true
-             when: |
-                    p=pages[0]
-                    if p.attributes.get('page_class','invoice')=='drivers-license':
-                        action=PROCESS
-                    else:
-                        action=SKIP_PAGE
-             artifacts:
-                base_model_name_or_path: id_card_model 
-    - tasks:
-          - name: "Predict_token_invoice"
-            class: argus.processors.train_eval_processors.TrainEvalProcessor
-            parameters:
-              predict_only: true
-              when: |
-                    p=pages[0]
-                    if p.attributes.get('page_class','drivers-license')=='invoice':
-                        action=PROCESS
-                    else:
-                        action=SKIP_PAGE
-              artifacts:
-                base_model_name_or_path: trained_model_invoice 
+       - name: "Predict_token"
+         class: argus.processors.train_eval_processors.TrainEvalProcessor
+         parameters:
+           artifacts:
+              base_model_name_or_path: id_card_model # matches the basename before .zip
     - tasks:
           - name: "PostProcess"
             class: argus.processors.post_processors.generic_post_processor.PostProcessor
@@ -82,8 +60,3 @@ spec: # A scoring pipeline example that does conditional processing, OCR and pag
     artifacts:
       - source: "s3://document-ai-data/test_data/id_card_model.zip"
         name: "id_card_model"
-      - source: "s3://document-ai-data/test_data/trained_model_invoice.zip"
-        name: "trained_model_invoice"
-      - source: "s3://document-ai-data/test_data/page_classifier_ID_INV.zip"
-        name: "page_classifier_ID_INV"
-          #class_names: invoice, drivers-license
