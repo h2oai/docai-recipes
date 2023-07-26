@@ -1,0 +1,54 @@
+spec: # A general pipeline example that only does OCR on a set of data
+
+  pipeline:
+    steps:
+    - tasks:
+       - name: "Intake" # name of task
+         type: PipelineTask # if absent, defaults to PipelineTask.  Can also be PipelineReorderInputs and InputCommand.  InputCommand cannot be used in the scorer.
+         class: argus.processors.ocr_processors.Intake # fqn_of_Processor class
+         parameters:
+           root_docs_path: /input/path
+           follow_symlinks: true
+    - tasks:
+       - name: "PdfExtract"
+         type: PipelineTask 
+         class: argus.processors.ocr_processors.PdfTextExtract
+    - tasks:
+       - name: "ImageNormalize"
+         class: argus.processors.ocr_processors.NormalizeImages
+         parameters:
+           resample_to_dpi: 300 
+           normalize_image_format: .jpg
+    - tasks:
+       - name: "OCR"
+         class: argus.processors.ocr_processors.GenericOcr
+         parameters:
+           ocr_style: DocTROcr
+    - tasks:
+       - name: "PostProcess"
+         class: argus.processors.post_processors.ocr_only_post_processor.PostProcessor
+         parameters:
+           output_format: 'json'
+           labeling_threshold: 0.5
+
+
+    - tasks:
+        ...
+    #other parameters to the Pipeline constructor go here
+    output_dir: /some/path # the location where inner and final annosets will be written (if they'll be written).  Also the location of the output root_resource_paths
+    output_annoset_format:  #the format of the final (output) annosets.  Defaults to in-memory output annoset.
+      path: null
+      options: {}
+    working_dir: /some/path #all relative paths will be relative to this dir, (except output annosets and their root_resource_paths, which are relative to output_dir)
+    #document filtering options
+    doc_id_prefix: null #can be /path
+    doc_id_prefix_range: null #can be [path, path], python-range style
+    filter_ids_file: null #can be path/to/one_doc_name_per_line.txt
+    write_all_steps: false #if true, write inner output annosets in pickle format 
+    cache_processors: true #if true, cache Processor instances rather than constructing them from scratch for every invocation
+    
+    artifacts:
+    - source: "s3://document-ai-data/test_data/id_card_model.zip"
+      name: "id_card"
+    - source: "s3://document-ai-data/test_data/page_class_model.zip"
+      name: "page_class_model"
