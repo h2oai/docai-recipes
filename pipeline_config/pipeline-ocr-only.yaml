@@ -29,7 +29,6 @@ spec: # A general pipeline example that only does OCR on a set of data
          class: argus.processors.post_processors.ocr_only_post_processor.PostProcessor
          parameters:
            output_format: 'json'
-           labeling_threshold: 0.5
 
 
     - tasks:
