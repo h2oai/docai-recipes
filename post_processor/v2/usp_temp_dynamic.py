@@ -42,7 +42,7 @@ class PostProcessor(BasePostProcessor):
         if not self.has_labelling_model:
             return []
 
-	      df_doc = doc_to_df(doc, doc_id, self.token_label_names)
+	df_doc = doc_to_df(doc, doc_id, self.token_label_names)
 
         docs = post_process_predictions(
             model_preds=df_doc,
