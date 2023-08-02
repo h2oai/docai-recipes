@@ -1,4 +1,4 @@
-spec: # A general scoring pipeline example that does OCR, token class prediction and page class prediction on a set of data
+spec: # A general pipeline example that only does OCR on a set of data
 
   pipeline:
     steps:
@@ -23,34 +23,12 @@ spec: # A general scoring pipeline example that does OCR, token class prediction
        - name: "OCR"
          class: argus.processors.ocr_processors.GenericOcr
          parameters:
-           ocr_style: E3DocTROcr
-    - tasks:
-       - name: "move input annoset from 0th into 1st position"
-         type: PipelineReorderInputs
-         reordering: [null, 0]
-    - tasks:
-       - name: "Predict_token"
-         class: argus.processors.train_eval_processors.TrainEvalProcessor
-         parameters:
-           artifacts:
-              base_model_name_or_path: id_card # matches the basename before .zip
-    - tasks:
-       - name: "move input annoset from 0th into 1st position"
-         type: PipelineReorderInputs
-         reordering: [null, 0]
-    - tasks:
-       - name: "Predict_page" 
-         class: argus.processors.train_eval_processors.TrainEvalProcessor
-         parameters:
-           uses_resource_dir: false
-           artifacts:
-              base_model_name_or_path: page_class_model
+           ocr_style: DocTROcr
     - tasks:
        - name: "PostProcess"
-         class: argus.processors.post_processors.generic_post_processor.PostProcessor
+         class: argus.processors.post_processors.ocr_only_post_processor.PostProcessor
          parameters:
            output_format: 'json'
-           labeling_threshold: 0.2
 
 
     - tasks:

@@ -33,7 +33,7 @@ spec: # A general scoring pipeline example that does OCR, token class prediction
          class: argus.processors.train_eval_processors.TrainEvalProcessor
          parameters:
            artifacts:
-              base_model_name_or_path: id_card # matches the basename before .zip
+              base_model_name_or_path: id_card_model # matches the basename before .zip
     - tasks:
        - name: "move input annoset from 0th into 1st position"
          type: PipelineReorderInputs
@@ -47,7 +47,7 @@ spec: # A general scoring pipeline example that does OCR, token class prediction
               base_model_name_or_path: page_class_model
     - tasks:
        - name: "PostProcess"
-         class: argus.processors.post_processors.generic_post_processor.PostProcessor
+         class: custom_post_processor.PostProcessor
          parameters:
            output_format: 'json'
            labeling_threshold: 0.2
@@ -69,7 +69,6 @@ spec: # A general scoring pipeline example that does OCR, token class prediction
     cache_processors: true #if true, cache Processor instances rather than constructing them from scratch for every invocation
     
     artifacts:
-    - source: "s3://document-ai-data/test_data/id_card_model.zip"
-      name: "id_card"
-    - source: "s3://document-ai-data/test_data/page_class_model.zip"
-      name: "page_class_model"
+    - "s3://document-ai-data/test_data/id_card_model.zip"
+    - "s3://document-ai-data/test_data/page_class_model.zip"
+    - "s3://document-ai-data/test_data/custom_post_processor.py"
