@@ -76,7 +76,7 @@ class PostProcessor(BasePostProcessor):
         for doc in docs:
             predictions = docs[doc]
             predictions_filtered = []
-            for label in self.label_top_n["class_names"]:
+            for label in self.class_names:
                 pred_df = predictions[predictions.label == label]
                 pred_df = pred_df[pred_df["probability"] > labeling_threshold]
                 predictions_filtered.append(pred_df)
