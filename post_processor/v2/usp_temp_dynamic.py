@@ -41,7 +41,7 @@ class PostProcessor(BasePostProcessor):
     def get_entities(self, doc: Document, doc_id: str) -> List[SupplyChainEntity]:
         if not self.has_labelling_model:
             return []
-
+		
 	df_doc = doc_to_df(doc, doc_id, self.token_label_names)
 
         docs = post_process_predictions(
