@@ -2871,7 +2871,7 @@ def post_process_predictions(
             df = pd.DataFrame()
 
         # ===== Templates ======
-        print(templates_input_dir)
+        print(f"pdf dir for templates: {templates_input_dir})
         if try_templates and os.path.isdir(templates_input_dir):
             try:
                 # log.info(bcolors.BOLD + '   *** Checking templates ***' + bcolors.ENDC)
