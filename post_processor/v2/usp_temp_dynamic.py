@@ -68,11 +68,8 @@ class PostProcessor(BasePostProcessor):
 
         for doc in docs:
             docs[doc]["id"] = docs[doc]["label"].apply(lambda row: str(uuid.uuid4()))
-
-        if hasattr(self.extra_params, "labelingThreshold"):
-            labeling_threshold = self.extra_params["labelingThreshold"]
-        else:
-            labeling_threshold = 0.5  # default labeling threshold
+            
+        labeling_threshold = self.labeling_threshold
 
         df_list = []
         # only one array - assuming there will be only one document provided
