@@ -62,7 +62,7 @@ class PostProcessor(BasePostProcessor):
             # template options
             try_templates=True,
             template_dicts=template_dict_list,  # template_dict_list is a global variable declared in this script 
-            templates_input_dir=self.root_docs_path,
+            templates_input_dir=self.input_dir,
             use_camelot_tables=False,
             images_dir_camelot="",
             verbose=True,
