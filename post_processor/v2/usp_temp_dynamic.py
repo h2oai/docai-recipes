@@ -2875,7 +2875,7 @@ def post_process_predictions(
             df = pd.DataFrame()
 
         # ===== Templates ======
-        print(f"pdf dir for templates: {templates_input_dir})
+        print(f"pdf dir for templates: {templates_input_dir}")
         if try_templates and os.path.isdir(templates_input_dir):
             try:
                 # log.info(bcolors.BOLD + '   *** Checking templates ***' + bcolors.ENDC)
@@ -2884,7 +2884,9 @@ def post_process_predictions(
                 filenames = os.listdir(templates_input_dir)
                 for filename in filenames:
                     print(filename)
-                    
+                
+                # get rid of the suffix from doc_ID and make it the same as it used to be 
+                doc_ID = doc_ID[:-4]    
                 fname = glob(f"{templates_input_dir}/{doc_ID}.[Pp][Dd][Ff]")[0]
                 print(f"template filename: {fname}")
                 print("delay 10s.")
