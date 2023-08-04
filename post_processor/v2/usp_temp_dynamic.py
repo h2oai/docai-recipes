@@ -2876,13 +2876,13 @@ def post_process_predictions(
             try:
                 # log.info(bcolors.BOLD + '   *** Checking templates ***' + bcolors.ENDC)
                 print("*** Checking templates ***")
+
+                filenames = os.listdir(templates_input_dir)
+                for filename in filenames:
+                    print(filename)
+                    
                 fname = glob(f"{templates_input_dir}/{doc_ID}.[Pp][Dd][Ff]")[0]
-                # root_dir = os.path.realpath(
-                #     os.path.join(os.path.dirname(__file__), '../../../..')
-                # )  # root dir of the project: argus-ocr
-                # json_path = os.path.join(root_dir, f'{templates_dict_dir}/*.json')
-                # template_jsons = glob(json_path)
-                # log.info(f"{len(template_jsons)} template jsons found in {json_path}.")
+                print(f"template filename: {fname}")
 
                 doc_dict, use_model_preds = process_templates(fname, template_dicts)
                 if doc_dict:
