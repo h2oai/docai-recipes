@@ -335,12 +335,10 @@ def process_templates(fname, template_dicts, template_dict=None):
     path, bn = os.path.split(fname)
     doc_id = os.path.splitext(bn)[0]
     img_path = "./images"
-    print("delay2 10s.")
-    time.sleep(10)
+
     if not os.path.exists(img_path):
         os.makedirs(img_path)
-    print("delay3 10s.")
-    time.sleep(10)
+
     page_xmls, pages, pdf_images, fnames = argus_ocr.PdfTextExtract(
         ser=None, input_dir=path, images_dir=img_path
     )._get_data_to_process_for_fname(bn, doc_id)
@@ -2748,6 +2746,9 @@ def post_process_predictions(
         # log.info(
         #    bcolors.HEADER + f'\n\n---------- Processing document {j}/{len(docs)} : {doc_ID} ----------' + bcolors.ENDC
         # )
+        
+        # get rid of the suffix from doc_ID and make it the same as it used to be 
+        doc_ID = doc_ID[:-4]  
         print(
             f"\n\n---------- Processing document {j}/{len(docs)} : {doc_ID} ----------"
         )
@@ -2884,13 +2885,10 @@ def post_process_predictions(
                 filenames = os.listdir(templates_input_dir)
                 for filename in filenames:
                     print(filename)
-                
-                # get rid of the suffix from doc_ID and make it the same as it used to be 
-                doc_ID = doc_ID[:-4]    
+
                 fname = glob(f"{templates_input_dir}/{doc_ID}.[Pp][Dd][Ff]")[0]
                 print(f"template filename: {fname}")
-                print("delay 10s.")
-                time.sleep(10)
+
 
                 doc_dict, use_model_preds = process_templates(fname, template_dicts)
                 if doc_dict:
