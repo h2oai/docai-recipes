@@ -8,7 +8,7 @@ class PostProcessor(PostProcessorSupplyChain):
     results and translates them into a final json structure that will be returned to user.
     """
 
-    def has_text_tokens(via_predictions):
+    def has_text_tokens(self, via_predictions):
         text_values = []
         for key, value in via_predictions['_via_img_metadata'].items():
             regions = value['regions']
