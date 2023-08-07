@@ -24,7 +24,6 @@ class PostProcessor(PostProcessorSupplyChain):
         return len(joined_text) > 0
 
 
-    
     def get_pages(self) -> Dict[int, Any]:
         return super().get_pages()
 
