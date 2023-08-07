@@ -8,11 +8,27 @@ class PostProcessor(PostProcessorSupplyChain):
     results and translates them into a final json structure that will be returned to user.
     """
 
+    def has_text_tokens(via_predictions):
+        text_values = []
+        for key, value in via_predictions['_via_img_metadata'].items():
+            regions = value['regions']
+            for region in regions:
+                text = region['region_attributes'].get('text', None)
+                if text is not None:
+                    text_values.append(str(text))
+        joined_text = "".join(text_values)
+        return len(joined_text) > 0
+
+    
     def get_pages(self) -> Dict[int, Any]:
         return super().get_pages()
 
+    
     def get_entities(self):
         if not self.has_labelling_model:
+            return []
+
+        if not has_text_tokens(self.label_via_predictions):
             return []
 
         merging_results = pp.post_process_via_predictions(input_dir='',
