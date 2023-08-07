@@ -9,15 +9,20 @@ class PostProcessor(PostProcessorSupplyChain):
     """
 
     def has_text_tokens(self, via_predictions):
+        if not via_predictions:
+            return False
+    
         text_values = []
-        for key, value in via_predictions['_via_img_metadata'].items():
-            regions = value['regions']
+        img_metadata = via_predictions.get('_via_img_metadata', {})
+        for key, value in img_metadata.items():
+            regions = value.get('regions', [])
             for region in regions:
                 text = region['region_attributes'].get('text', None)
                 if text is not None:
                     text_values.append(str(text))
         joined_text = "".join(text_values)
         return len(joined_text) > 0
+
 
     
     def get_pages(self) -> Dict[int, Any]:
