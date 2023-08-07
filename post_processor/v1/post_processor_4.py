@@ -28,7 +28,7 @@ class PostProcessor(PostProcessorSupplyChain):
         if not self.has_labelling_model:
             return []
 
-        if not has_text_tokens(self.label_via_predictions):
+        if not self.has_text_tokens(self.label_via_predictions):
             return []
 
         merging_results = pp.post_process_via_predictions(input_dir='',
