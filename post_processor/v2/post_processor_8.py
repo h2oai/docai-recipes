@@ -2736,9 +2736,6 @@ def post_process_predictions(
 
     for j, (doc_ID, doc_df) in enumerate(docs):
         start_time = time.time()
-        # log.info(
-        #    bcolors.HEADER + f'\n\n---------- Processing document {j}/{len(docs)} : {doc_ID} ----------' + bcolors.ENDC
-        # )
         print(
             f"\n\n---------- Processing document {j}/{len(docs)} : {doc_ID} ----------"
         )
@@ -2818,7 +2815,6 @@ def post_process_predictions(
             df = df.join(probabilities_df)
 
         if parse_line_items:
-            # log.debug('Executing line item parsing method..')
             print("Executing line item parsing method..")
             try:
                 pdf_fname = ""
@@ -2839,8 +2835,6 @@ def post_process_predictions(
 
             except Exception as e:
                 traceback.print_exc()
-                # log.warning(bcolors.WARNING + f'Line item could not be parsed: {doc_ID}' + bcolors.ENDC)
-                # log.warning(bcolors.WARNING + str(e) + bcolors.ENDC)
                 print(f"Line item could not be parsed: {doc_ID}")
                 print(e)
                 df["line"] = None
@@ -2850,14 +2844,11 @@ def post_process_predictions(
 
         if output_labels == "EXCLUDE_O":
             df = df.loc[df["label"].str.strip().str.len() > 0].reset_index(drop=True)
-            # log.debug('output all labels')
             print("output all labels")
         elif isinstance(output_labels, list):
             df = df.loc[df["label"].isin(output_labels)].reset_index(drop=True)
-            # log.debug(f'output labels: {output_labels} ')
             print(f"output labels: {output_labels} ")
 
-        # log.info(bcolors.BOLD + '   *** Results using ML method ***' + bcolors.ENDC)
         print("   *** Results using ML method ***")
         if df is not None:
             pp.print_output(df, line_items=parse_line_items, verbose=verbose)
@@ -2869,19 +2860,11 @@ def post_process_predictions(
         print(templates_input_dir)
         if try_templates and os.path.isdir(templates_input_dir):
             try:
-                # log.info(bcolors.BOLD + '   *** Checking templates ***' + bcolors.ENDC)
                 print("*** Checking templates ***")
                 fname = glob(f"{templates_input_dir}/{doc_ID}.[Pp][Dd][Ff]")[0]
-                # root_dir = os.path.realpath(
-                #     os.path.join(os.path.dirname(__file__), '../../../..')
-                # )  # root dir of the project: argus-ocr
-                # json_path = os.path.join(root_dir, f'{templates_dict_dir}/*.json')
-                # template_jsons = glob(json_path)
-                # log.info(f"{len(template_jsons)} template jsons found in {json_path}.")
 
                 doc_dict, use_model_preds = process_templates(fname, template_dicts)
                 if doc_dict:
-                    # log.info(bcolors.OKBLUE + '   *** Template matched. Results using templates ***' + bcolors.ENDC)
                     print("   *** Template matched. Results using templates ***")
                     doc_df = dict2csv(doc_ID, doc_dict)
                     if use_model_preds:
@@ -2925,17 +2908,10 @@ def post_process_predictions(
                     if not doc_df.empty:
                         pp.print_output(doc_df, line_items=parse_line_items)
                 else:
-                    # log.info('  *** No template found. using ML results ***')
                     print("  *** No template found. using ML results ***")
                     doc_df = df
 
             except Exception as e:
-                # log.warning(
-                #     bcolors.WARNING
-                #     + f'Error while using templates: {doc_ID}. Using ML results instead.'
-                #     + bcolors.ENDC
-                # )
-                # log.warning(bcolors.WARNING + str(e) + bcolors.ENDC)
                 print(
                     f"Error while using templates: {doc_ID}. Using ML results instead."
                 )
@@ -2946,7 +2922,6 @@ def post_process_predictions(
             doc_df = df
         final_results.update({doc_ID: doc_df})
 
-        # log.info(bcolors.OKCYAN + f'post-processing time: {time.time() - start_time} seconds' + bcolors.ENDC)
         print(f"post-processing time: {time.time() - start_time} seconds")
 
     return final_results
