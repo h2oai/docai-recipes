@@ -2857,7 +2857,10 @@ def post_process_predictions(
             df = pd.DataFrame()
 
         # ===== Templates ======
-        print(templates_input_dir)
+        print(f" templates input dir : {templates_input_dir}")
+        if os.path.isdir(templates_input_dir):
+            print("templates input dir is readable")
+        
         if try_templates and os.path.isdir(templates_input_dir):
             try:
                 print("*** Checking templates ***")
