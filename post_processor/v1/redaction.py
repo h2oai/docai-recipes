@@ -63,7 +63,7 @@ class PostProcessor(PostProcessorSupplyChain):
                 df_list.append(self.get_entity(doc, row))
         return df_list
 
-    def get_entity(self, doc, filtered_row) -> GenericEntity:
+    def get_entity(self, doc, filtered_row):
         filename = f"{doc}+{filtered_row['page_id']}{self.img_extension}"
         sliced_img = cv2.imencode(
             ".png",
@@ -74,21 +74,8 @@ class PostProcessor(PostProcessorSupplyChain):
         )[1]
         img = bytes(sliced_img.flatten())
 
-        filtered_label = self.remove_non_ascii(filtered_row["label"])
-        filtered_text = self.remove_non_ascii(filtered_row["text"])
-        data_bundle: GenericEntity = {
+        data_bundle = {
             "pageIndex": filtered_row["page_id"],
-            "text": filtered_text,
-            "label": filtered_label,
-            "labelConfidence": round(float(filtered_row["probability"]), 3),
-            "ocrConfidence": round(
-                float(filtered_row.get("ocr_confidence", 1.0)), 3
-            ),  # in templates, ocr_confidence may not be available
-            "xmin": filtered_row["xmin"],
-            "ymin": filtered_row["ymin"],
-            "xmax": filtered_row["xmax"],
-            "ymax": filtered_row["ymax"],
-            "entityId": filtered_row["id"],
             "image": base64.b64encode(img).decode("ascii"),
         }
 
