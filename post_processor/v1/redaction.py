@@ -9,6 +9,9 @@ from h2o_docai_scorer.post_processors.post_processor_supply_chain import PostPro
 from argus_contrib.utils import post_process as pp
 
 
+labels_to_redact = ['address', 'name', 'phone', 'fax', 'email', 'website', 'other']
+
+
 class PostProcessor(PostProcessorSupplyChain):
     """Represents a last step in pipeline process that receives all pipeline intermediate
     results and translates them into a final json structure that will be returned to user.
@@ -32,6 +35,11 @@ class PostProcessor(PostProcessorSupplyChain):
     def get_pages(self) -> Dict[int, Any]:
         return super().get_pages()
 
+    def redact_region(self, image, xmin, ymin, xmax, ymax):
+        """Redact a given region in the image using OpenCV."""
+        cv2.rectangle(image, (xmin, ymin), (xmax, ymax), (0, 0, 0), -1)
+        return image
+
     def get_entities(self):
         if not self.has_labelling_model:
             return []
@@ -54,29 +62,38 @@ class PostProcessor(PostProcessorSupplyChain):
             try_templates=False,
         )
 
-        df_list = []
+        redacted_images_per_page = {}
         for doc in merging_results:
             predictions = merging_results[doc]
             predictions = predictions.round(decimals=4)
-            for idx, row in predictions.iterrows():
-                # df_list.append(row.to_dict())
-                df_list.append(self.get_entity(doc, row))
-        return df_list
 
-    def get_entity(self, doc, filtered_row):
-        filename = f"{doc}+{filtered_row['page_id']}{self.img_extension}"
-        sliced_img = cv2.imencode(
-            ".png",
-            self.images[filename][
-                int(filtered_row["ymin"]) : int(filtered_row["ymax"]),
-                int(filtered_row["xmin"]) : int(filtered_row["xmax"]),
-            ],
-        )[1]
-        img = bytes(sliced_img.flatten())
+            # Filter the predictions based on the provided labels
+            filtered_predictions = predictions[predictions['label'].isin(labels_to_redact)]
 
-        data_bundle = {
-            "pageIndex": filtered_row["page_id"],
-            "image": base64.b64encode(img).decode("ascii"),
-        }
+            for _, row in filtered_predictions.iterrows():
+                page_id = row["page_id"]
+                filename = f"{doc}+{page_id}{self.img_extension}"
 
-        return data_bundle
+                if filename not in redacted_images_per_page:
+                    redacted_images_per_page[filename] = self.images[filename].copy()
+
+                redacted_images_per_page[filename] = self.redact_region(
+                    redacted_images_per_page[filename],
+                    int(row["xmin"]),
+                    int(row["ymin"]),
+                    int(row["xmax"]),
+                    int(row["ymax"]),
+                )
+
+        redacted_data_bundles = []
+        for filename, redacted_image in redacted_images_per_page.items():
+            _, img_encoded = cv2.imencode(".png", redacted_image)
+            img = bytes(img_encoded.flatten())
+
+            data_bundle = {
+                "pageIndex": filename.split('+')[1].split(self.img_extension)[0],
+                "image": base64.b64encode(img).decode("ascii"),
+            }
+            redacted_data_bundles.append(data_bundle)
+
+        return redacted_data_bundles
