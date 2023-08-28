@@ -7,7 +7,8 @@ spec: # A general scoring pipeline example that does OCR, token class prediction
          type: PipelineTask # if absent, defaults to PipelineTask.  Can also be PipelineReorderInputs and InputCommand.  InputCommand cannot be used in the scorer.
          class: argus.processors.ocr_processors.Intake # fqn_of_Processor class
          parameters:
-           root_docs_path: /input/path
+           #Replace with path to your input docs. Can be relative.
+           root_docs_path: .
            follow_symlinks: true
     - tasks:
        - name: "PdfExtract"
@@ -25,24 +26,17 @@ spec: # A general scoring pipeline example that does OCR, token class prediction
          parameters:
            ocr_style: E3DocTROcr
     - tasks:
-       - name: "move input annoset from 0th into 1st position"
-         type: PipelineReorderInputs
-         reordering: [null, 0]
-    - tasks:
        - name: "Predict_token"
          class: argus.processors.train_eval_processors.TrainEvalProcessor
          parameters:
+           predict_only: true
            artifacts:
               base_model_name_or_path: id_card # matches the basename before .zip
-    - tasks:
-       - name: "move input annoset from 0th into 1st position"
-         type: PipelineReorderInputs
-         reordering: [null, 0]
     - tasks:
        - name: "Predict_page" 
          class: argus.processors.train_eval_processors.TrainEvalProcessor
          parameters:
-           uses_resource_dir: false
+           predict_only: true
            artifacts:
               base_model_name_or_path: page_class_model
     - tasks:
@@ -52,15 +46,12 @@ spec: # A general scoring pipeline example that does OCR, token class prediction
            output_format: 'json'
            labeling_threshold: 0.2
 
-
-    - tasks:
-        ...
     #other parameters to the Pipeline constructor go here
-    output_dir: /some/path # the location where inner and final annosets will be written (if they'll be written).  Also the location of the output root_resource_paths
-    output_annoset_format:  #the format of the final (output) annosets.  Defaults to in-memory output annoset.
-      path: null
-      options: {}
-    working_dir: /some/path #all relative paths will be relative to this dir, (except output annosets and their root_resource_paths, which are relative to output_dir)
+    # format: #the format of the intermediate and final (output) annosets.  Defaults to PickleAnnoset.
+    #  path: ''
+    #  options:
+    #    type: PickleAnnotationSet
+    # working_dir: /some/path #all relative paths will be relative to this dir, (except output annosets and their root_resource_paths, which are relative to output_dir).  The default working_dir is where the script is executed #all relative paths will be relative to this dir, (except output annosets and their root_resource_paths, which are relative to output_dir)
     #document filtering options
     doc_id_prefix: null #can be /path
     doc_id_prefix_range: null #can be [path, path], python-range style

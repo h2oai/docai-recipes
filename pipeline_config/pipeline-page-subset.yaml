@@ -1,0 +1,52 @@
+spec:
+  # An example of taking only the first page from a document
+  pipeline:
+    steps:
+    - tasks:
+       - name: "Intake" #name of task
+         type: PipelineTask # if absent, defaults to PipelineTask.  Can also be PipelineReorderInputs and InputCommand.  InputCommand cannot be used in the scorer.
+         class: argus.processors.ocr_processors.Intake # fqn_of_Processor class
+         parameters:
+           #Replace with path to your input docs. Can be relative.
+           root_docs_path: tests/data/mini_dataset/mixed_docs
+           follow_symlinks: true
+           doc_plus_pagenum_filenames: if_possible #this is the default anyway
+    - tasks:
+         - name: "PdfExtract"
+           type: PipelineTask 
+           class: argus.processors.ocr_processors.PdfTextExtract 
+    - tasks:
+         - name: "ImageNormalize"
+           class: argus.processors.ocr_processors.NormalizeImages
+           parameters:
+    #at this point, we have:
+    #   1. all the pages from pdf files extracted and grouped by document
+    #   2. all the images with the page_name+page_num names grouped by document because of the Intake's  doc_plus_pagenum_filenames param
+    #   3. all other images represented as an empty document, named the same as the image file, with the document's resource_path set to the image filename.
+    #   See Intake and PdfExtract documentation in notes/data_model.md
+    #
+    #   We now will take the first 1 page in each document with pages or the whole document with resource_path set.
+    #   This means we will drop pages numbered >0, for the docs containing pages
+    - tasks:
+         - name: "TakeFirstPage"
+           class: argus.processors.core_processors.MiniProgram
+           parameters:
+             prog: |
+               if page_id>0:
+                 #`If a doc has no pages as in case 3 above, this gets called once with page_id==-1
+                 # so the if above covers both page_id==0 and page_id==-1 cases
+                 action=DROP_PAGE
+
+
+    #other processing steps happen only on the first page of each doc.
+    #- tasks:
+    #     - name: "OCR"
+    #       class: argus.processors.ocr_processors.GenericOcr
+    #       parameters:
+    #         ocr_style: E3DocTROcr
+
+    #other parameters to the Pipeline constructor go here
+    format: #the format of the intermediate and final (output) annosets.  Defaults to PickleAnnoset.
+      path: ''
+      options:
+        type: PickleAnnotationSet
