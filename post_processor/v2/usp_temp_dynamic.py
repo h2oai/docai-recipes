@@ -1,9 +1,7 @@
-# from typing import TypedDict, List
-# import uuid
-# import pandas as pd
-
-# from argus.processors.post_processors.utils import post_process as pp
-# from h2o_docai_scorer.post_processors import BasePostProcessor, BaseEntity
+"""
+Dynamic template code.
+Works with DocAI > 0.7.0
+"""
 
 import uuid
 import pandas as pd
@@ -68,7 +66,7 @@ class PostProcessor(BasePostProcessor):
 
         for doc in docs:
             docs[doc]["id"] = docs[doc]["label"].apply(lambda row: str(uuid.uuid4()))
-            
+
         labeling_threshold = self.labeling_threshold
 
         df_list = []
@@ -324,7 +322,7 @@ def template_router(pages, template_dicts):
                         print(e)
 
                 if router_anchors and (np.mean(router_anchors) > 0.5):
-                    print(f"Match found: {template_dict}")
+                    # print(f"Match found: {template_dict}")
                     return template_dict
         except Exception as e:
             print(f"Error during template router with {template_dict}")
@@ -2743,12 +2741,8 @@ def post_process_predictions(
 
     for j, (doc_ID, doc_df) in enumerate(docs):
         start_time = time.time()
-        # log.info(
-        #    bcolors.HEADER + f'\n\n---------- Processing document {j}/{len(docs)} : {doc_ID} ----------' + bcolors.ENDC
-        # )
-        
-        # get rid of the suffix from doc_ID and make it the same as it used to be 
-        doc_ID = doc_ID[:-4]  
+        # get rid of the suffix from doc_ID and make it the same as it used to be
+        doc_ID = doc_ID[:-4]
         print(
             f"\n\n---------- Processing document {j}/{len(docs)} : {doc_ID} ----------"
         )
@@ -2828,12 +2822,10 @@ def post_process_predictions(
             df = df.join(probabilities_df)
 
         if parse_line_items:
-            # log.debug('Executing line item parsing method..')
             print("Executing line item parsing method..")
             try:
                 pdf_fname = ""
                 if use_camelot_tables:
-                    # log.info('Trying to parse line items using camelot tables..')
                     print("Trying to parse line items using camelot tables..")
                     pdf_fname = glob(f"{templates_input_dir}/{doc_ID}.[Pp][Dd][Ff]")[0]
 
@@ -2849,8 +2841,6 @@ def post_process_predictions(
 
             except Exception as e:
                 traceback.print_exc()
-                # log.warning(bcolors.WARNING + f'Line item could not be parsed: {doc_ID}' + bcolors.ENDC)
-                # log.warning(bcolors.WARNING + str(e) + bcolors.ENDC)
                 print(f"Line item could not be parsed: {doc_ID}")
                 print(e)
                 df["line"] = None
@@ -2860,14 +2850,11 @@ def post_process_predictions(
 
         if output_labels == "EXCLUDE_O":
             df = df.loc[df["label"].str.strip().str.len() > 0].reset_index(drop=True)
-            # log.debug('output all labels')
             print("output all labels")
         elif isinstance(output_labels, list):
             df = df.loc[df["label"].isin(output_labels)].reset_index(drop=True)
-            # log.debug(f'output labels: {output_labels} ')
             print(f"output labels: {output_labels} ")
 
-        # log.info(bcolors.BOLD + '   *** Results using ML method ***' + bcolors.ENDC)
         print("   *** Results using ML method ***")
         if df is not None:
             pp.print_output(df, line_items=parse_line_items, verbose=verbose)
@@ -2876,23 +2863,14 @@ def post_process_predictions(
             df = pd.DataFrame()
 
         # ===== Templates ======
-        print(f"pdf dir for templates: {templates_input_dir}")
         if try_templates and os.path.isdir(templates_input_dir):
             try:
-                # log.info(bcolors.BOLD + '   *** Checking templates ***' + bcolors.ENDC)
                 print("*** Checking templates ***")
-
-                filenames = os.listdir(templates_input_dir)
-                for filename in filenames:
-                    print(filename)
-
                 fname = glob(f"{templates_input_dir}/{doc_ID}.[Pp][Dd][Ff]")[0]
                 print(f"template filename: {fname}")
 
-
                 doc_dict, use_model_preds = process_templates(fname, template_dicts)
                 if doc_dict:
-                    # log.info(bcolors.OKBLUE + '   *** Template matched. Results using templates ***' + bcolors.ENDC)
                     print("   *** Template matched. Results using templates ***")
                     doc_df = dict2csv(doc_ID, doc_dict)
                     if use_model_preds:
@@ -2936,17 +2914,10 @@ def post_process_predictions(
                     if not doc_df.empty:
                         pp.print_output(doc_df, line_items=parse_line_items)
                 else:
-                    # log.info('  *** No template found. using ML results ***')
                     print("  *** No template found. using ML results ***")
                     doc_df = df
 
             except Exception as e:
-                # log.warning(
-                #     bcolors.WARNING
-                #     + f'Error while using templates: {doc_ID}. Using ML results instead.'
-                #     + bcolors.ENDC
-                # )
-                # log.warning(bcolors.WARNING + str(e) + bcolors.ENDC)
                 print(
                     f"Error while using templates: {doc_ID}. Using ML results instead."
                 )
@@ -2956,8 +2927,6 @@ def post_process_predictions(
         else:
             doc_df = df
         final_results.update({doc_ID: doc_df})
-
-        # log.info(bcolors.OKCYAN + f'post-processing time: {time.time() - start_time} seconds' + bcolors.ENDC)
         print(f"post-processing time: {time.time() - start_time} seconds")
 
     return final_results
