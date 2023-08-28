@@ -1,4 +1,4 @@
-# This script is intended for argus 0.21.36 and docai 0.6.3. Using other versions may cause issues.
+# Works with DocAI 0.6.2
 
 
 from typing import TypedDict, List
@@ -2857,7 +2857,6 @@ def post_process_predictions(
             df = pd.DataFrame()
 
         # ===== Templates ======
-        print(templates_input_dir)
         if try_templates and os.path.isdir(templates_input_dir):
             try:
                 print("*** Checking templates ***")
