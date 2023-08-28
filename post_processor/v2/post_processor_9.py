@@ -3,16 +3,16 @@ This script works with DccAI v0.6.*
 It provides potential redaction of specific image regions based on given labels and/or text patterns.
 """
 import re
+import json
 import uuid
 import base64
 import cv2
-import json
 import numpy as np
 import pandas as pd
 from typing import Dict, Any, List
-
+#from argus_contrib.utils import post_process as pp
 from argus.processors.post_processors.utils import post_process as pp
-from h2o_docai_scorer.post_processors import BasePostProcessor
+from h2o_docai_scorer.post_processors import BasePostProcessor, BaseEntity
 
 """
 User input: labels/text patterns to be redacted.
@@ -27,6 +27,10 @@ labels_to_redact = None
 text_patterns_to_redact = [r"^\d{3} \d{3} \d{3}$", r'\b\d{9}\b']  # regex pattern: 111 222 333, 111222333
 
 
+class CustomEntity(BaseEntity):
+    image: str
+
+
 class PostProcessor(BasePostProcessor):
     """
     A post-processor class for processing intermediate results and
@@ -38,6 +42,7 @@ class PostProcessor(BasePostProcessor):
 
     def argus_resolution(self) -> int:
         return self.ARGUS_DPI
+
     @staticmethod
     def has_text_tokens(via_predictions: dict) -> bool:
         if not via_predictions:
@@ -77,7 +82,7 @@ class PostProcessor(BasePostProcessor):
 
         return pd.concat([label_filtered, pattern_filtered]).drop_duplicates()
 
-    def get_entities(self) -> List[dict]:
+    def get_entities(self) -> List[CustomEntity]:
 
         if not self.has_labelling_model or not self.has_text_tokens(self.label_via_predictions):
             return []
@@ -120,10 +125,13 @@ class PostProcessor(BasePostProcessor):
 
         for filename, redacted_image in redacted_images_per_page.items():
             _, img_encoded = cv2.imencode(".png", redacted_image)
-            data_bundle = {
+            data_bundle: CustomEntity = {
                 "pageIndex": filename.split('+')[1].split(self.img_extension)[0],
                 "image": base64.b64encode(img_encoded).decode("ascii")
             }
             redacted_data_bundles.append(data_bundle)
+
+        # with open('redacted_data.json', 'w') as json_file:
+        #     json.dump(redacted_data_bundles, json_file, indent=4)
 
         return redacted_data_bundles
