@@ -126,7 +126,4 @@ class PostProcessor(BasePostProcessor):
             }
             redacted_data_bundles.append(data_bundle)
 
-        with open('redacted_data.json', 'w') as json_file:
-            json.dump(redacted_data_bundles, json_file, indent=4)
-
         return redacted_data_bundles
