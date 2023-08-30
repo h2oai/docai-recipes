@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 from typing import Dict, Any, List
 from argus_contrib.utils import post_process as pp
-# from argus.processors.post_processors.utils import post_process as pp
 from h2o_docai_scorer.post_processors import BasePostProcessor, BaseEntity
 
 """
