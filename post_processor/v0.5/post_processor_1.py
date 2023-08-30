@@ -42,7 +42,6 @@ class PostProcessor(BasePostProcessor):
             labeling_threshold = 0.5  # default labeling threshold
 
         df_list = []
-        # only one array - assuming there will be only one document provided
         for doc in docs:
             predictions = docs[doc]
             predictions_filtered = []

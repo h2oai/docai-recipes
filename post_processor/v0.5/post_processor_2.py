@@ -1,10 +1,8 @@
 from typing import List
-
 import uuid
 import pandas as pd
-
 from argus_contrib.utils import post_process as pp
-from h2o_docai_scorer.post_processors import SupplyChainEntity, BasePostProcessor
+from h2o_docai_scorer.post_processors import BasePostProcessor, SupplyChainEntity
 
 
 class PostProcessor(BasePostProcessor):
@@ -16,6 +14,8 @@ class PostProcessor(BasePostProcessor):
         return self.ARGUS_DPI
 
     def get_entities(self) -> List[SupplyChainEntity]:
+        if not self.has_labelling_model:
+            return []
 
         merging_results = pp.post_process_via_predictions(input_dir=self.input_dir,
                                                           via_predictions=self.label_via_predictions,
@@ -26,12 +26,11 @@ class PostProcessor(BasePostProcessor):
                                                           labels_to_merge_xy="address|name",
                                                           parse_line_items=True,
                                                           output_labels='FULL',
-                                                          output_cleaning_method='BSMH',
+                                                          output_cleaning_method='NONE',
                                                           token_merge_threshold_x=0.5,
                                                           token_merge_threshold_xy=0.33,
-                                                          try_templates=True,
-                                                          templates_dict_dir="bsmh",
-                                                          line_th=0.6
+                                                          try_templates=False,
+                                                          templates_dict_dir=""
                                                           )
 
         for doc in merging_results:
@@ -43,7 +42,6 @@ class PostProcessor(BasePostProcessor):
             labeling_threshold = 0.5  # default labeling threshold
 
         df_list = []
-        # only one array - assuming there will be only one document provided
         for doc in merging_results:
             predictions = merging_results[doc]
             predictions_filtered = []
@@ -54,21 +52,23 @@ class PostProcessor(BasePostProcessor):
             predictions_filtered = pd.concat(predictions_filtered)
 
             for idx, row in predictions_filtered.iterrows():
-                filename = doc + '+' + str(row['page_id']) + self.img_extension
-                filtered_label = self.remove_non_ascii(row['label'])
-                filtered_text = self.remove_non_ascii(row['text'])
-
-                data_bundle: SupplyChainEntity = {
-                    'pageIndex': row['page_id'],
-                    filtered_label: filtered_text,
-                    'lineId': row['line'],
-                    "labelConfidence": round(float(row["probability"]), 3),
-                    'imageCoordinates': {
-                        'xmin': (row['xmin']),
-                        'ymin': (row['ymin']),
-                        'xmax': (row['xmax']),
-                        'ymax': (row['ymax'])},
-                }
-                df_list.append(data_bundle)
-
+                df_list.append(self.get_entity(doc, row))
         return df_list
+
+    def get_entity(self, doc, filtered_row) -> SupplyChainEntity:
+        filtered_label = self.remove_non_ascii(filtered_row['label'])
+        filtered_text = self.remove_non_ascii(filtered_row['text'])
+        data_bundle: SupplyChainEntity = {
+            'pageIndex': filtered_row['page_id'],
+            filtered_label: filtered_text,
+            'lineId': filtered_row['line'],
+            "labelConfidence": round(float(filtered_row["probability"]), 3),
+            "ocrConfidence": round(float(filtered_row.get("ocr_confidence", 1.0)), 3),
+            'imageCoordinates': {
+                'xmin': (filtered_row['xmin']),
+                'ymin': (filtered_row['ymin']),
+                'xmax': (filtered_row['xmax']),
+                'ymax': (filtered_row['ymax'])
+            },
+        }
+        return data_bundle

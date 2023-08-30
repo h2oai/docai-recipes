@@ -59,7 +59,6 @@ class PostProcessor(BasePostProcessor):
             labeling_threshold = 0.5  # default labeling threshold
 
         df_list = []
-        # only one array - assuming there will be only one document provided
         for doc in docs:
             predictions = docs[doc]
             predictions_filtered = []
@@ -87,7 +86,8 @@ class PostProcessor(BasePostProcessor):
             "text": filtered_text,
             "label": filtered_label,
             "labelConfidence": round(float(filtered_row["probability"]), 3),
-            "ocrConfidence": round(float(filtered_row.get("ocr_confidence", 1.0)), 3), # in templates, ocr_confidence may not be available
+            "ocrConfidence": round(float(filtered_row.get("ocr_confidence", 1.0)), 3),
+            # in templates, ocr_confidence may not be available
             "xmin": (filtered_row["xmin"]),
             "ymin": (filtered_row["ymin"]),
             "xmax": (filtered_row["xmax"]),

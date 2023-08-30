@@ -37,7 +37,6 @@ class PostProcessor(PostProcessorSupplyChain):
                 df_list.append(row.to_dict())
         return df_list
 
-
     '''
     Converting the dictionary to a dataframe
     import pandas as pd
@@ -48,4 +47,3 @@ class PostProcessor(PostProcessorSupplyChain):
     df = pd.DataFrame(dict_data['entities'])
     df.to_csv('result.csv')
     '''
-

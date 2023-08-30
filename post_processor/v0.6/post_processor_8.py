@@ -1,5 +1,6 @@
-# Works with DocAI 0.6.2
-
+"""
+Works with DocAI 0.6.2
+"""
 
 from typing import TypedDict, List
 import uuid
@@ -67,7 +68,6 @@ class PostProcessor(BasePostProcessor):
             labeling_threshold = 0.5  # default labeling threshold
 
         df_list = []
-        # only one array - assuming there will be only one document provided
         for doc in docs:
             predictions = docs[doc]
             predictions_filtered = []
@@ -173,13 +173,13 @@ class Box(BoundingBox):
         return box
 
     def __init__(
-        self,
-        instance,
-        page_width,
-        page_height,
-        text_index=0,
-        text_index_rev=-1,
-        page_rev=0,
+            self,
+            instance,
+            page_width,
+            page_height,
+            text_index=0,
+            text_index_rev=-1,
+            page_rev=0,
     ):
         # del instance.a
         del instance.entities
@@ -265,7 +265,7 @@ class Box(BoundingBox):
         # compute the area of both the prediction and ground-truth
         # rectangles
         boxAArea = (self.rel_bbox[2] - self.rel_bbox[0]) * (
-            self.rel_bbox[3] - self.rel_bbox[1]
+                self.rel_bbox[3] - self.rel_bbox[1]
         )
 
         perc = interArea / float(boxAArea)
@@ -301,8 +301,8 @@ def template_router(pages, template_dicts):
                             if output:
                                 match_box = merge_boxes(output)
                                 if re.findall(
-                                    re.compile(re.escape(anchor_1["regex"])),
-                                    match_box.text,
+                                        re.compile(re.escape(anchor_1["regex"])),
+                                        match_box.text,
                                 ):
                                     router_anchors[-1] = True
                                 else:
@@ -338,7 +338,7 @@ def process_templates(fname, template_dicts, template_dict=None):
     doc_dict = {}
     pages_list = []
     for pnum, (page_xml, page, image_fname) in enumerate(
-        zip(page_xmls, pages, [os.path.join(img_path, f) for f in fnames])
+            zip(page_xmls, pages, [os.path.join(img_path, f) for f in fnames])
     ):
         try:
             pdf_text_extract = argus_ocr.PdfTextExtract(BaseSerializer, input_dir=path)
@@ -2653,26 +2653,26 @@ template_dict_list = [
 
 
 def post_process_predictions(
-    model_preds: Union[Dict[str, Dict[str, Dict[str, Dict[str, str]]]], pd.DataFrame],
-    top_n_preds: Union[Dict[str, Union[List[float], str]], List[str]],
-    token_merge_type: str = "MIXED_MERGE",
-    token_merge_xdist_regular: float = 1.0,
-    label_merge_x_regular: str or None = None,
-    token_merge_xydist_regular: float = 1.0,
-    label_merge_xy_regular: str or None = None,
-    token_merge_xdist_wide: float = 1.5,
-    label_merge_x_wide: str or None = None,
-    constraint_dict: Dict[str, int] = {},
-    output_labels: str = "INCLUDE_O",
-    parse_line_items: bool = False,
-    line_item_completeness: float = 0.6,
-    try_templates: bool = False,
-    template_dicts: List = None,
-    templates_input_dir: str = "./",
-    templates_use_model_preds_mapping: Dict[str, List[str]] = {},
-    use_camelot_tables: bool = False,
-    images_dir_camelot: str = "",
-    verbose: bool = False,
+        model_preds: Union[Dict[str, Dict[str, Dict[str, Dict[str, str]]]], pd.DataFrame],
+        top_n_preds: Union[Dict[str, Union[List[float], str]], List[str]],
+        token_merge_type: str = "MIXED_MERGE",
+        token_merge_xdist_regular: float = 1.0,
+        label_merge_x_regular: str or None = None,
+        token_merge_xydist_regular: float = 1.0,
+        label_merge_xy_regular: str or None = None,
+        token_merge_xdist_wide: float = 1.5,
+        label_merge_x_wide: str or None = None,
+        constraint_dict: Dict[str, int] = {},
+        output_labels: str = "INCLUDE_O",
+        parse_line_items: bool = False,
+        line_item_completeness: float = 0.6,
+        try_templates: bool = False,
+        template_dicts: List = None,
+        templates_input_dir: str = "./",
+        templates_use_model_preds_mapping: Dict[str, List[str]] = {},
+        use_camelot_tables: bool = False,
+        images_dir_camelot: str = "",
+        verbose: bool = False,
 ) -> Dict[str, pd.DataFrame]:
     """
     Post-processes the model predictions for Document Information Extraction.
@@ -2871,8 +2871,8 @@ def post_process_predictions(
                         for use_model_preds_label in use_model_preds:
                             label_list = []
                             for (
-                                key,
-                                label_list,
+                                    key,
+                                    label_list,
                             ) in templates_use_model_preds_mapping.items():
                                 if use_model_preds_label in label_list:
                                     break
@@ -2880,7 +2880,7 @@ def post_process_predictions(
                             label_model_preds = df[df["label"].isin(label_list)]
                             temp_preds = doc_df[
                                 doc_df["label"] == use_model_preds_label
-                            ]
+                                ]
 
                             for i, row in label_model_preds.iterrows():
                                 ious = temp_preds.apply(

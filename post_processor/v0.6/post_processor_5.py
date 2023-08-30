@@ -59,7 +59,7 @@ class PostProcessor(BasePostProcessor):
             for class_name in class_names:
                 class_probabilities = []
                 for entity_value, class_probability, id in zip(
-                    predictions["text"], predictions[class_name], predictions["id"]
+                        predictions["text"], predictions[class_name], predictions["id"]
                 ):
                     if class_probability >= labeling_threshold:
                         class_probabilities.append(
@@ -174,7 +174,7 @@ class PostProcessor(BasePostProcessor):
         sliced_img = cv2.imencode(
             ".png",
             self.images[filename][
-                int(row["ymin"]) : int(row["ymax"]), int(row["xmin"]) : int(row["xmax"])
+            int(row["ymin"]): int(row["ymax"]), int(row["xmin"]): int(row["xmax"])
             ],
         )[1]
         img = bytes(sliced_img.flatten())

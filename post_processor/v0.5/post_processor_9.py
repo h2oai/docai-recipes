@@ -1,5 +1,5 @@
 """
-This script works with DccAI v0.6.*
+This script works with DccAI v0.5.*
 It provides potential redaction of specific image regions based on given labels and/or text patterns.
 """
 import re
@@ -10,7 +10,8 @@ import cv2
 import numpy as np
 import pandas as pd
 from typing import Dict, Any, List
-from argus.processors.post_processors.utils import post_process as pp
+from argus_contrib.utils import post_process as pp
+# from argus.processors.post_processors.utils import post_process as pp
 from h2o_docai_scorer.post_processors import BasePostProcessor, BaseEntity
 
 """
@@ -23,7 +24,7 @@ text_patterns_to_redact = [r'[A-Za-z]{3}\d{6}', r'\d{3}-\d{2}-\d{4}', r'\b\d{11}
 """
 
 labels_to_redact = None
-text_patterns_to_redact = [r"^\d{3} \d{3} \d{3}$", r'\b\d{9}\b']   # regex pattern: 111 222 333, 111222333
+text_patterns_to_redact = [r"^\d{3} \d{3} \d{3}$", r'\b\d{9}\b']  # regex pattern: 111 222 333, 111222333
 
 
 class CustomEntity(BaseEntity):
@@ -82,19 +83,18 @@ class PostProcessor(BasePostProcessor):
         if not self.has_labelling_model or not self.has_text_tokens(self.label_via_predictions):
             return []
 
-        docs = pp.post_process_predictions(
-            model_preds=self.label_via_predictions,
-            top_n_preds=self.label_top_n,
-            token_merge_type="MIXED_MERGE",
-            token_merge_xdist_regular=1.0,
-            label_merge_x_regular="ALL",
-            token_merge_xydist_regular=1.0,
-            label_merge_xy_regular="address",
-            token_merge_xdist_wide=1.5,
-            label_merge_x_wide="phone|fax",
-            output_labels="INCLUDE_O",
-            verbose=True,
-        )
+        docs = pp.post_process_via_predictions(input_dir=self.input_dir,
+                                               via_predictions=self.label_via_predictions,
+                                               probabilities=self.label_top_n,
+                                               token_merge_type='mixed',
+                                               labels_to_merge_x="",
+                                               labels_to_merge_x_long_range="",
+                                               labels_to_merge_xy="address",
+                                               output_labels='ALL',  # 'ALL_TOKENS including O tokens
+                                               token_merge_threshold_x=0.5,
+                                               token_merge_threshold_xy=0.33,
+                                               try_templates=False,
+                                               )
 
         redacted_images_per_page = {}
         redacted_text_per_page = {}
@@ -137,7 +137,7 @@ class PostProcessor(BasePostProcessor):
 
             data_bundle: CustomEntity = {
                 "pageIndex": page_index,
-                "redactedData": concatenated_redacted_text,  # Include the concatenated redacted text
+                "redactedData": concatenated_redacted_text,
                 "image": base64.b64encode(img_encoded).decode("ascii")
             }
             redacted_data_bundles.append(data_bundle)

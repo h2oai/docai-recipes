@@ -1,12 +1,14 @@
 from typing import List
+
 import uuid
 import pandas as pd
 
-from argus.processors.post_processors.utils import post_process as pp
+from argus_contrib.utils import post_process as pp
 from h2o_docai_scorer.post_processors import BasePostProcessor, SupplyChainEntity
 
 
 class PostProcessor(BasePostProcessor):
+
     def client_resolution(self):
         return None
 
@@ -17,46 +19,37 @@ class PostProcessor(BasePostProcessor):
         if not self.has_labelling_model:
             return []
 
-        docs = pp.post_process_predictions(
-            model_preds=self.label_via_predictions,
-            top_n_preds=self.label_top_n,
-            # token merging options
-            token_merge_type="MIXED_MERGE",
-            token_merge_xdist_regular=1.0,
-            label_merge_x_regular="name|address|description",
-            token_merge_xydist_regular=1.0,
-            label_merge_xy_regular="name|address",
-            token_merge_xdist_wide=1.5,
-            label_merge_x_wide="phone|fax|total|net|due|date|number|invoice|po|order",
-            output_labels="EXCLUDE_O",
-            # line-item parsing options
-            parse_line_items=True,
-            line_item_completeness=0.6,
-            # template options
-            try_templates=False,
-            templates_dict_dir="",
-            templates_input_dir=self.input_dir,
-            use_camelot_tables=False,
-            images_dir_camelot="",
-            verbose=True,
-        )
+        merging_results = pp.post_process_via_predictions(input_dir=self.input_dir,
+                                                          via_predictions=self.label_via_predictions,
+                                                          probabilities=self.label_top_n,
+                                                          token_merge_type='mixed',  # "x", "xy", mixed
+                                                          labels_to_merge_x="",
+                                                          labels_to_merge_x_long_range="",
+                                                          labels_to_merge_xy="address|name",
+                                                          parse_line_items=True,
+                                                          output_labels='FULL',
+                                                          output_cleaning_method='NONE',
+                                                          token_merge_threshold_x=0.5,
+                                                          token_merge_threshold_xy=0.33,
+                                                          try_templates=False,
+                                                          templates_dict_dir=""
+                                                          )
 
-        for doc in docs:
-            docs[doc]["id"] = docs[doc]["label"].apply(lambda row: str(uuid.uuid4()))
+        for doc in merging_results:
+            merging_results[doc]['id'] = merging_results[doc]['label'].apply(lambda row: str(uuid.uuid4()))
 
-        if hasattr(self.extra_params, "labelingThreshold"):
+        if hasattr(self.extra_params, 'labelingThreshold'):
             labeling_threshold = self.extra_params["labelingThreshold"]
         else:
             labeling_threshold = 0.5  # default labeling threshold
 
         df_list = []
-        # only one array - assuming there will be only one document provided
-        for doc in docs:
-            predictions = docs[doc]
+        for doc in merging_results:
+            predictions = merging_results[doc]
             predictions_filtered = []
-            for label in self.label_top_n["class_names"]:
+            for label in self.label_top_n['class_names']:
                 pred_df = predictions[predictions.label == label]
-                pred_df = pred_df[pred_df["probability"] > labeling_threshold]
+                pred_df = pred_df[pred_df['probability'] > labeling_threshold]
 
                 if pred_df.empty:
                     pred_df = pd.DataFrame(columns=predictions.columns)
@@ -69,10 +62,10 @@ class PostProcessor(BasePostProcessor):
             predictions_filtered = pd.concat(predictions_filtered)
 
             for idx, row in predictions_filtered.iterrows():
-                df_list.append(self.get_entity(row))
+                df_list.append(self.get_entity(doc, row))
         return df_list
 
-    def get_entity(self, filtered_row) -> SupplyChainEntity:
+    def get_entity(self, doc, filtered_row) -> SupplyChainEntity:
         filtered_label = self.remove_non_ascii(filtered_row['label'])
         filtered_text = self.remove_non_ascii(filtered_row['text'])
         data_bundle: SupplyChainEntity = {
@@ -88,5 +81,4 @@ class PostProcessor(BasePostProcessor):
                 'ymax': (filtered_row['ymax'])
             },
         }
-
         return data_bundle

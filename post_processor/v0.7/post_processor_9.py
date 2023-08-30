@@ -16,7 +16,6 @@ from argus.processors.post_processors.base_post_processor import BasePostProcess
 from argus.processors.post_processors.utils.utility import doc_to_df
 from argus.processors.post_processors.utils import post_process as pp
 
-
 """
 User input: labels/text patterns to be redacted.
 Valid values:

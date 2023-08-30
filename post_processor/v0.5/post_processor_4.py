@@ -11,7 +11,7 @@ class PostProcessor(PostProcessorSupplyChain):
     def has_text_tokens(self, via_predictions):
         if not via_predictions:
             return False
-    
+
         text_values = []
         img_metadata = via_predictions.get('_via_img_metadata', {})
         for key, value in img_metadata.items():
@@ -23,11 +23,9 @@ class PostProcessor(PostProcessorSupplyChain):
         joined_text = "".join(text_values)
         return len(joined_text) > 0
 
-
     def get_pages(self) -> Dict[int, Any]:
         return super().get_pages()
 
-    
     def get_entities(self):
         if not self.has_labelling_model:
             return []
@@ -57,7 +55,6 @@ class PostProcessor(PostProcessorSupplyChain):
                 df_list.append(row.to_dict())
         return df_list
 
-
     '''
     Converting the dictionary to a dataframe
     import pandas as pd
@@ -68,4 +65,3 @@ class PostProcessor(PostProcessorSupplyChain):
     df = pd.DataFrame(dict_data['entities'])
     df.to_csv('result.csv')
     '''
-
