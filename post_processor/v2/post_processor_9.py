@@ -10,7 +10,6 @@ import cv2
 import numpy as np
 import pandas as pd
 from typing import Dict, Any, List
-#from argus_contrib.utils import post_process as pp
 from argus.processors.post_processors.utils import post_process as pp
 from h2o_docai_scorer.post_processors import BasePostProcessor, BaseEntity
 
@@ -20,11 +19,11 @@ Valid values:
 labels_to_redact = None
 labels_to_redact = ['billing_name', 'billing_address']  # Must be model class labels
 text_patterns_to_redact = None
-text_patterns_to_redact = [r'[A-Za-z]{3}\d{6}', r'\d{3}-\d{2}-\d{4}', r'\b\d{11}\b']
+text_patterns_to_redact = [r'[A-Za-z]{3}\d{6}', r'\d{3}-\d{2}-\d{4}', r'\b\d{11}\b', r'\b\d{11}\b', r"\b\d{3}-\d{3}-\d{4}\b"]
 """
 
 labels_to_redact = None
-text_patterns_to_redact = [r"^\d{3} \d{3} \d{3}$", r'\b\d{9}\b']  # regex pattern: 111 222 333, 111222333
+text_patterns_to_redact = [r"^\d{3} \d{3} \d{3}$", r'\b\d{9}\b']   # regex pattern: 111 222 333, 111222333
 
 
 class CustomEntity(BaseEntity):
@@ -43,8 +42,7 @@ class PostProcessor(BasePostProcessor):
     def argus_resolution(self) -> int:
         return self.ARGUS_DPI
 
-    @staticmethod
-    def has_text_tokens(via_predictions: dict) -> bool:
+    def has_text_tokens(self, via_predictions: dict) -> bool:
         if not via_predictions:
             return False
 
@@ -58,9 +56,6 @@ class PostProcessor(BasePostProcessor):
                     text_values.append(str(text))
         joined_text = "".join(text_values)
         return len(joined_text) > 0
-
-    def get_pages(self) -> Dict[int, Any]:
-        return super().get_pages()
 
     @staticmethod
     def redact_region(image: np.array, xmin: int, ymin: int, xmax: int, ymax: int) -> np.array:
@@ -102,7 +97,7 @@ class PostProcessor(BasePostProcessor):
         )
 
         redacted_images_per_page = {}
-        redacted_data_bundles = []
+        redacted_text_per_page = {}
 
         for doc in docs:
             docs[doc]["id"] = docs[doc]["label"].apply(lambda row: str(uuid.uuid4()))
@@ -123,15 +118,28 @@ class PostProcessor(BasePostProcessor):
                     int(row["xmax"]), int(row["ymax"])
                 )
 
+                page_id = row['page_id']
+                text_to_redact = row['text']
+
+                # Concatenate redacted text for each page
+                if page_id in redacted_text_per_page:
+                    redacted_text_per_page[page_id] += " | " + text_to_redact
+                else:
+                    redacted_text_per_page[page_id] = text_to_redact
+
+        redacted_data_bundles = []
         for filename, redacted_image in redacted_images_per_page.items():
             _, img_encoded = cv2.imencode(".png", redacted_image)
+            page_index = filename.split('+')[1].split(self.img_extension)[0]
+
+            # Get the concatenated redacted text for this page
+            concatenated_redacted_text = redacted_text_per_page.get(page_index, "")
+
             data_bundle: CustomEntity = {
-                "pageIndex": filename.split('+')[1].split(self.img_extension)[0],
+                "pageIndex": page_index,
+                "redactedData": concatenated_redacted_text,  # Include the concatenated redacted text
                 "image": base64.b64encode(img_encoded).decode("ascii")
             }
             redacted_data_bundles.append(data_bundle)
-
-        # with open('redacted_data.json', 'w') as json_file:
-        #     json.dump(redacted_data_bundles, json_file, indent=4)
 
         return redacted_data_bundles
