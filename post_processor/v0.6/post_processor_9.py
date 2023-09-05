@@ -130,23 +130,6 @@ class PostProcessor(BasePostProcessor):
                 else:
                     redacted_text_per_page[page_id] = text_to_redact
 
-        # redacted_data_bundles = []
-        # for filename, redacted_image in redacted_images_per_page.items():
-        #     _, img_encoded = cv2.imencode(".png", redacted_image)
-        #     page_index = filename.split('+')[1].split(self.img_extension)[0]
-        #
-        #     # Get the concatenated redacted text for this page
-        #     concatenated_redacted_text = redacted_text_per_page.get(page_index, "")
-        #
-        #     data_bundle: CustomEntity = {
-        #         "pageIndex": page_index,
-        #         "redactedData": concatenated_redacted_text,  # Include the concatenated redacted text
-        #         "image": base64.b64encode(img_encoded).decode("ascii")
-        #     }
-        #     redacted_data_bundles.append(data_bundle)
-        #
-        # return redacted_data_bundles
-
         # Initialize the list for the data bundles
         redacted_data_bundles = []
 
