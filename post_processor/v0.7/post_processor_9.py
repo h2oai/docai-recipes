@@ -10,6 +10,8 @@ import cv2
 import numpy as np
 import pandas as pd
 from typing import List
+from PIL import Image
+from io import BytesIO
 
 from argus.data_model import Document
 from argus.processors.post_processors.base_post_processor import BasePostProcessor, BaseEntity
@@ -27,6 +29,7 @@ text_patterns_to_redact = [r'[A-Za-z]{3}\d{6}', r'\d{3}-\d{2}-\d{4}', r'\b\d{11}
 
 labels_to_redact = None
 text_patterns_to_redact = [r"^\d{3} \d{3} \d{3}$", r'\b\d{9}\b']  # regex pattern: 111 222 333, 111222333
+save_as = "pdf"  # "image" or "pdf"
 
 
 class CustomEntity(BaseEntity):
@@ -132,22 +135,46 @@ class PostProcessor(BasePostProcessor):
                 else:
                     redacted_text_per_page[page_id] = text_to_redact
 
-        # Create the data bundles
+
+        # Initialize the list for the data bundles
         redacted_data_bundles = []
+
+        # save as image
+        pil_images = []
         for filename, redacted_image in redacted_images_per_page.items():
-            _, img_encoded = cv2.imencode(".png", redacted_image)
-            page_index = filename.split('+')[1].split(self.img_extension)[0]
+            pil_image = Image.fromarray(cv2.cvtColor(redacted_image, cv2.COLOR_BGR2RGB))
+            pil_images.append(pil_image)
 
-            # Get the concatenated redacted text for this page
-            concatenated_redacted_text = redacted_text_per_page.get(page_index, "")
+            if save_as == "image":
+                img_buffer = BytesIO()
+                pil_image.save(img_buffer, format="PNG")
+                img_base64 = base64.b64encode(img_buffer.getvalue()).decode('ascii')
 
-            data_bundle: CustomEntity = {
-                "pageIndex": page_index,
-                "redactedData": concatenated_redacted_text,
-                "image": base64.b64encode(img_encoded).decode("ascii")
+                page_index = filename.split('+')[1].split(self.img_extension)[0]
+                concatenated_redacted_text = redacted_text_per_page.get(page_index, "")
 
+                image_data_bundle: CustomEntity = {
+                    "pageIndex": page_index,
+                    "redactedData": concatenated_redacted_text,
+                    "image": img_base64
+                }
+
+                redacted_data_bundles.append(image_data_bundle)
+
+        # save as PDF
+        if save_as == "pdf" and pil_images:
+            pdf_buffer = BytesIO()
+            pil_images[0].save(pdf_buffer, format='PDF', save_all=True, append_images=pil_images[1:], resolution=100.0, quality=95, optimize=True)
+
+            pdf_base64 = base64.b64encode(pdf_buffer.getvalue()).decode('ascii')
+
+            pdf_data_bundle: CustomEntity = {
+                "pageIndex": "PDF",
+                "redactedData": "This is the entire PDF",
+                "image": pdf_base64
             }
 
-            redacted_data_bundles.append(data_bundle)
+            redacted_data_bundles.append(pdf_data_bundle)
 
         return redacted_data_bundles
+
