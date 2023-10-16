@@ -2634,6 +2634,426 @@ applied_medical = {
     ],
 }
 
+alcon = {
+    "header_items": {
+        "customer_po_date": {
+            "use_model_preds": False,
+            "page_num": 0,
+            "anchor_1": {
+                "regex": "Order Date:",
+                "ignore_case": False,
+                "selection_index": 0
+            },
+            "search_areas": [
+                [
+                    [
+                        "anchor_1",
+                        "right",
+                        0.0033
+                    ],
+                    [
+                        "anchor_1",
+                        "top",
+                        -0.0035
+                    ],
+                    [
+                        "anchor_1",
+                        "right",
+                        0.1003
+                    ],
+                    [
+                        "anchor_1",
+                        "bottom",
+                        0.0003
+                    ]
+                ]
+            ]
+        },
+        "order_number": {
+            "use_model_preds": False,
+            "page_num": 0,
+            "anchor_1": {
+                "regex": "Order Number:",
+                "ignore_case": False,
+                "selection_index": 0,
+                "router_coordinates": [
+                    0.45,
+                    0.14,
+                    0.56,
+                    0.17
+                ]
+            },
+            "search_areas": [
+                [
+                    [
+                        "anchor_1",
+                        "right",
+                        0.0035
+                    ],
+                    [
+                        "anchor_1",
+                        "top",
+                        -0.0051
+                    ],
+                    [
+                        "anchor_1",
+                        "right",
+                        0.1218
+                    ],
+                    [
+                        "anchor_1",
+                        "bottom",
+                        -0.0
+                    ]
+                ]
+            ]
+        },
+        "receiver_address": {
+            "use_model_preds": True,
+            "page_num": 0,
+            "anchor_1": {
+                "regex": "Ship To:",
+                "ignore_case": False,
+                "selection_index": 0
+            },
+            "search_areas": [
+                [
+                    [
+                        "anchor_1",
+                        "left",
+                        -0.0001
+                    ],
+                    [
+                        "anchor_1",
+                        "bottom",
+                        0.0279
+                    ],
+                    [
+                        "anchor_1",
+                        "right",
+                        0.1914
+                    ],
+                    [
+                        "anchor_1",
+                        "bottom",
+                        0.123
+                    ]
+                ]
+            ]
+        },
+        "receiver_name": {
+            "use_model_preds": False,
+            "page_num": 0,
+            "anchor_1": {
+                "regex": "Ship To:",
+                "ignore_case": False,
+                "selection_index": 0
+            },
+            "search_areas": [
+                [
+                    [
+                        "anchor_1",
+                        "left",
+                        -0.0001
+                    ],
+                    [
+                        "anchor_1",
+                        "bottom",
+                        0.0049
+                    ],
+                    [
+                        "anchor_1",
+                        "right",
+                        0.2025
+                    ],
+                    [
+                        "anchor_1",
+                        "bottom",
+                        0.0238
+                    ]
+                ]
+            ]
+        },
+        "supplier_address": {
+            "use_model_preds": False,
+            "page_num": 0,
+            "anchor_1": {
+                "regex": "UOM Unit Price",
+                "ignore_case": False,
+                "selection_index": 0
+            },
+            "search_areas": [
+                [
+                    [
+                        "anchor_1",
+                        "right",
+                        0.004
+                    ],
+                    [
+                        "anchor_1",
+                        "top",
+                        -0.258
+                    ],
+                    [
+                        "anchor_1",
+                        "right",
+                        0.1223
+                    ],
+                    [
+                        "anchor_1",
+                        "top",
+                        -0.1532
+                    ]
+                ]
+            ]
+        },
+        "supplier_name": {
+            "use_model_preds": False,
+            "page_num": 0,
+            "anchor_1": {
+                "regex": "Ship To:",
+                "ignore_case": False,
+                "selection_index": 0,
+                "router_coordinates": [
+                    0.1,
+                    0.19,
+                    0.15,
+                    0.21
+                ]
+            },
+            "search_areas": [
+                [
+                    [
+                        "anchor_1",
+                        "right",
+                        0.6236
+                    ],
+                    [
+                        "anchor_1",
+                        "bottom",
+                        0.0017
+                    ],
+                    [
+                        "anchor_1",
+                        "right",
+                        0.7481
+                    ],
+                    [
+                        "anchor_1",
+                        "bottom",
+                        0.0194
+                    ]
+                ]
+            ]
+        }
+    },
+    "tables": [
+        {
+            "table_end": [
+                {
+                    "regex": "Estimated delivery for regular ground shipping",
+                    "ignore_case": False,
+                    "selection_index": 0,
+                    "document_table_end": True
+                },
+                {
+                    "regex": "Page of",
+                    "ignore_case": False,
+                    "selection_index": 0,
+                    "document_table_end": False
+                }
+            ],
+            "headers_exist_on_additional_pages": True,
+            "line_anchor": {
+                "column_name": "Quantity Shipped",
+                "selection_index": 0,
+                "vertical_alignment": "top",
+                "left_coordinate": 0.1003,
+                "right_coordinate": 0.2015
+            },
+            "remove_line_regex": "",
+            "table_start_regex": "",
+            "fields": {
+                "line_item_id": {
+                    "read_to_next_line_item": False,
+                    "search_areas": [
+                        [
+                            [
+                                None,
+                                0.1012
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0
+                            ],
+                            [
+                                None,
+                                0.2015
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0.03180286755714501
+                            ]
+                        ]
+                    ]
+                },
+                "line_description": {
+                    "read_to_next_line_item": False,
+                    "search_areas": [
+                        [
+                            [
+                                None,
+                                0.205
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0
+                            ],
+                            [
+                                None,
+                                0.4265
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0.03180286755714501
+                            ]
+                        ]
+                    ]
+                },
+                "line_quantity": {
+                    "read_to_next_line_item": False,
+                    "search_areas": [
+                        [
+                            [
+                                None,
+                                0.6437
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0
+                            ],
+                            [
+                                None,
+                                0.6879
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0.03180286755714501
+                            ]
+                        ]
+                    ]
+                },
+                "line_unit": {
+                    "read_to_next_line_item": False,
+                    "search_areas": [
+                        [
+                            [
+                                None,
+                                0.6876
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0
+                            ],
+                            [
+                                None,
+                                0.7223
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0.03180286755714501
+                            ]
+                        ]
+                    ]
+                },
+                "line_unit_price": {
+                    "read_to_next_line_item": False,
+                    "search_areas": [
+                        [
+                            [
+                                None,
+                                0.7223
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0
+                            ],
+                            [
+                                None,
+                                0.7734
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0.03180286755714501
+                            ]
+                        ]
+                    ]
+                },
+                "line_quantity_bo": {
+                    "read_to_next_line_item": False,
+                    "search_areas": [
+                        [
+                            [
+                                None,
+                                0.7745
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0
+                            ],
+                            [
+                                None,
+                                0.8275
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0.03180286755714501
+                            ]
+                        ]
+                    ]
+                },
+                "customer_purchase_order": {
+                    "read_to_next_line_item": False,
+                    "search_areas": [
+                        [
+                            [
+                                None,
+                                0.43
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0
+                            ],
+                            [
+                                None,
+                                0.63
+                            ],
+                            [
+                                "line_anchor",
+                                "top",
+                                0.03180286755714501
+                            ]
+                        ]
+                    ]
+                }
+            }
+        }
+    ]
+}
+
 # Create a list to store the JSON data
 template_dict_list = [
     arthrex,
@@ -2644,6 +3064,7 @@ template_dict_list = [
     roche,
     surgitech,
     applied_medical,
+    alcon
 ]
 
 
