@@ -2,6 +2,7 @@ from typing import Dict, Any
 from argus.processors.post_processors.utils import post_process as pp
 from h2o_docai_scorer.post_processors.post_processor_supply_chain import PostProcessor as PostProcessorSupplyChain
 from transformers import AutoTokenizer
+import os
 
 
 
@@ -17,7 +18,9 @@ class PostProcessor(PostProcessorSupplyChain):
         if not self.has_labelling_model:
             return []
         
-        tokenizer = AutoTokenizer.from_pretrained("microsoft/layoutlm-base-uncased")
+        model_dir = os.environ.get('DOCAI_LABEL_MODEL_DIR', "microsoft/layoutlm-base-uncased")
+                
+        tokenizer = AutoTokenizer.from_pretrained(model_dir)
         for _, value in self.label_via_predictions['_via_img_metadata'].items():
             regions = value['regions']
             cleaned_regions = []        
