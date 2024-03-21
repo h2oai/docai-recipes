@@ -134,7 +134,7 @@ class PostProcessor(PostProcessorSupplyChain):
     """
 
     def get_pages(self) -> Dict[int, Any]:
-        return {}
+        return super().get_pages()
 
     def get_entities(self):
 
