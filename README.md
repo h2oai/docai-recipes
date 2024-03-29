@@ -15,7 +15,7 @@ The `post_processor` folder contains various sample scripts to aid users in craf
 ### Version Compatibility
 Different DocAI versions offer varying post-processing capabilities. To accommodate this:
 
-1. Browse the relevant folder based on your DocAI version.
+1. Browse the relevant folder based on your DocAI version. Versions later then v0.7 can use the post-processors for v0.7.
 2. Select the appropriate post-processing script for your needs.
 3. Use the script directly or modify it according to your needs.
 
