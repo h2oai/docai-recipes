@@ -12,3 +12,5 @@ Short descriptions of the scripts in each folder are provided below.
 - `post_processor_7.py`: Offers empty answers for unidentified model classes in general documents.
 - `post_processor_8.py`: Accepts template dicts for post-processing.
 - `post_processor_9.py`: Returns redacted image.
+- `post_processor_10.py`: For ocr-only pipeine, outputs all texts.
+- `post_processor_11.py`: Add signature detection result to the final output
