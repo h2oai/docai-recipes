@@ -27,9 +27,14 @@ dry_run=0
 while [[ $# -gt 0 ]]; do
   case $1 in
     -n|--namespace)
-      namespace="$2"
-      shift # past argument
-      shift # past value
+      if [[ -n "$2" && "$2" != -* ]]; then
+        namespace="$2"
+        shift # past argument
+        shift # past value
+      else
+        echo "Error: Argument for $1 is missing" >&2
+        exit 1
+      fi
       ;;
     -d|--dry-run)
       dry_run=1
@@ -76,7 +81,7 @@ while read -r namespace deployment_name replicas release_name pipeline; do
 
   replicas=$(echo "$replicas" | cut -d '=' -f2)
 
-  if [ "$replicas" == 0 ] || [ -z "$replicas" ]; then
+  if [[ "$replicas" == 0  || -z "$replicas" ]]; then
 
     if [ -z "$release_name" ]; then
         echo "Helm release name not found for pipeline: $pipeline (deployment: $deployment_name, namespace: $namespace)"
@@ -89,10 +94,7 @@ while read -r namespace deployment_name replicas release_name pipeline; do
     fi
 
     echo "Uninstalling Helm release: $release_name for pipeline: $pipeline (deployment: $deployment_name, namespace: $namespace)"
-    helm uninstall "$release_name" -n "$namespace"
-
-    # Check if the uninstall was successful
-    if [ $? -eq 0 ]; then
+    if helm uninstall "$release_name" -n "$namespace"; then
         echo "Successfully uninstalled Helm release: $release_name"
     else
         echo "Failed to uninstall Helm release: $release_name"
