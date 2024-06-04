@@ -70,6 +70,7 @@ if [ "$dry_run" == "1" ]; then
 fi
 
 found=0
+index=1
 
 # Check if there are any deployments
 if [ -z "$deployments" ]; then
@@ -89,7 +90,8 @@ else
 
       if [ "$dry_run" == "1" ]; then
         found=1
-        echo "Unstarted deployment for pipeline: $pipeline (Helm release: $release_name, deployment: $deployment_name, namespace: $ns)"
+        echo "$index. Unstarted deployment for pipeline: $pipeline (Helm release: $release_name, deployment: $deployment_name, namespace: $ns)"
+        ((index++))
         continue
       fi
 
@@ -117,7 +119,8 @@ if [ -z "$failing_releases" ]; then
 else
   while read -r release_name; do
     if [ "$dry_run" == "1" ]; then
-      echo "Failing Helm release: $release_name (namespace: $namespace)"
+      echo "$index. Failing Helm release: $release_name (namespace: $namespace)"
+      ((index++))
       continue
     fi
 
