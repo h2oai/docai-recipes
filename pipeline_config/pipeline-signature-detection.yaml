@@ -30,12 +30,14 @@ spec: # A scoring pipeline example that does general OCR and a specialOCR to det
     - tasks:
          - name: "Signature detection"
            class: argus.processors.ocr_processors.DetectSignature
+    # This task is optional, you do not need any token or page classifer to use the signature detection
     - tasks:
        - name: "Predict_token"
          class: argus.processors.train_eval_processors.TrainEvalProcessor
          parameters:
            artifacts:
               base_model_name_or_path: id_card_model # matches the basename before .zip
+    # TODO - add a custom post processor to include signature detection in the output, post_processor_11.py
     - tasks:
           - name: "PostProcess"
             class: argus.processors.post_processors.generic_post_processor.PostProcessor
