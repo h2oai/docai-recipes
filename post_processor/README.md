@@ -13,7 +13,8 @@ Short descriptions of the scripts in each folder are provided below.
 - `post_processor_8.py`: Accepts template dicts for post-processing.
 - `post_processor_9.py`: Returns redacted image.
 - `post_processor_10.py`: For ocr-only pipeine, outputs all texts.
-- `post_processor_11.py`: Add signature detection result to the final output
+- `post_processor_11.py`: Add Signature detection result to the final output
+- `post_processor_12.py`: Add Checkbox detection result to the final output, this feature added in v0.9
 
 
 
